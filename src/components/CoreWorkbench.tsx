@@ -4,10 +4,11 @@
  */
 
 import React, { useRef, useState } from 'react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { FileUp, FileText, ArrowLeft, Layout, CheckCircle2 } from 'lucide-react';
 import { FiloFile, ConversionMode } from '../types';
 import InlineCropper from './InlineCropper';
+
 
 interface CoreWorkbenchProps {
   files: FiloFile[];
@@ -171,17 +172,6 @@ export default function CoreWorkbench({
                   <ArrowLeft className="h-3.5 w-3.5 stroke-[2.5]" />
                   <span>Exit Workspace</span>
                 </button>
-
-                <div className="h-4 w-px bg-stone-200 dark:bg-stone-800" />
-
-                <div className="flex items-center space-x-1.5 select-none">
-                  <div className="h-5 w-5 rounded bg-blue-600 dark:bg-blue-500 flex items-center justify-center shadow-xs">
-                    <FileText className="h-3 w-3 text-white" strokeWidth={2.5} />
-                  </div>
-                  <span className="font-brand italic text-base font-bold tracking-tight text-stone-900 dark:text-stone-100 leading-none">
-                    Filo
-                  </span>
-                </div>
               </div>
 
               <div className="font-sans text-[11px] font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wide truncate max-w-[300px] hidden sm:block">
@@ -194,69 +184,85 @@ export default function CoreWorkbench({
 
             {/* Core Workspace Body */}
             <div className="flex-grow flex flex-col justify-center flex-1 min-h-0">
-              {mode === 'images-to-pdf' ? (
-                /* IMAGES-TO-PDF CROPPER */
-                <div className="h-full flex flex-col justify-center">
-                  {activeCropFile && activeCropFile.previewUrl ? (
-                    <InlineCropper 
-                      file={activeCropFile} 
-                      onSave={onSaveCrop}
-                      aspectRatioType={aspectRatioType}
-                      setAspectRatioType={setAspectRatioType}
-                      flipH={flipH}
-                      setFlipH={setFlipH}
-                      flipV={flipV}
-                      setFlipV={setFlipV}
-                      showGrid={showGrid}
-                      setShowGrid={setShowGrid}
-                      onRegisterActions={onRegisterActions}
-                    />
-                  ) : (
-                    <div className="h-72 border border-stone-200/50 dark:border-stone-800/40 bg-stone-50/20 rounded-xl flex items-center justify-center p-4">
-                      <div className="flex flex-col items-center space-y-2">
-                        <div className="w-5 h-5 border-2 border-stone-500 border-t-transparent rounded-full animate-spin" />
-                        <span className="font-sans text-xs text-stone-500">Retrieving active canvas...</span>
+              <AnimatePresence mode="wait" initial={false}>
+                {mode === 'images-to-pdf' ? (
+                  /* IMAGES-TO-PDF CROPPER */
+                  <motion.div
+                    key="images-to-pdf"
+                    initial={{ opacity: 0, scale: 0.99, y: 3 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.99, y: -3 }}
+                    transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                    className="h-full flex flex-col justify-center"
+                  >
+                    {activeCropFile && activeCropFile.previewUrl ? (
+                      <InlineCropper 
+                        file={activeCropFile} 
+                        onSave={onSaveCrop}
+                        aspectRatioType={aspectRatioType}
+                        setAspectRatioType={setAspectRatioType}
+                        flipH={flipH}
+                        setFlipH={setFlipH}
+                        flipV={flipV}
+                        setFlipV={setFlipV}
+                        showGrid={showGrid}
+                        setShowGrid={setShowGrid}
+                        onRegisterActions={onRegisterActions}
+                      />
+                    ) : (
+                      <div className="h-72 border border-stone-200/50 dark:border-stone-800/40 bg-stone-50/20 rounded-xl flex items-center justify-center p-4">
+                        <div className="flex flex-col items-center space-y-2">
+                          <div className="w-5 h-5 border-2 border-stone-500 border-t-transparent rounded-full animate-spin" />
+                          <span className="font-sans text-xs text-stone-500">Retrieving active canvas...</span>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                /* PDF-TO-FORMATS EXTRACTION CONTAINER */
-                <div className="space-y-6 py-2 flex flex-col h-full justify-center">
-                  {/* Status Visualizer */}
-                  <div className="border border-stone-200/50 dark:border-stone-900/40 bg-stone-50/15 dark:bg-stone-950/20 rounded-xl p-8 flex flex-col items-center justify-center text-center space-y-5">
-                    <div className="relative w-24 h-32 bg-white dark:bg-stone-900 border border-stone-200/50 dark:border-stone-800/40 rounded-xl shadow-xs flex flex-col p-2.5 justify-between">
-                      <div className="space-y-2 flex flex-col items-stretch">
-                        <div className="h-1 w-3/4 bg-stone-200 dark:bg-stone-800 rounded" />
-                        <div className="h-1 w-full bg-stone-200 dark:bg-stone-800 rounded" />
-                        <div className="h-1 w-5/6 bg-stone-200 dark:bg-stone-800 rounded" />
-                        <div className="h-1 w-2/3 bg-stone-200 dark:bg-stone-800 rounded" />
+                    )}
+                  </motion.div>
+                ) : (
+                  /* PDF-TO-FORMATS EXTRACTION CONTAINER */
+                  <motion.div
+                    key="pdf-to-formats"
+                    initial={{ opacity: 0, scale: 0.99, y: 3 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.99, y: -3 }}
+                    transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                    className="space-y-6 py-2 flex flex-col h-full justify-center"
+                  >
+                    {/* Status Visualizer */}
+                    <div className="border border-stone-200/50 dark:border-stone-900/40 bg-stone-50/15 dark:bg-stone-950/20 rounded-xl p-8 flex flex-col items-center justify-center text-center space-y-5">
+                      <div className="relative w-24 h-32 bg-white dark:bg-stone-900 border border-stone-200/50 dark:border-stone-800/40 rounded-xl shadow-xs flex flex-col p-2.5 justify-between">
+                        <div className="space-y-2 flex flex-col items-stretch">
+                          <div className="h-1 w-3/4 bg-stone-200 dark:bg-stone-800 rounded" />
+                          <div className="h-1 w-full bg-stone-200 dark:bg-stone-800 rounded" />
+                          <div className="h-1 w-5/6 bg-stone-200 dark:bg-stone-800 rounded" />
+                          <div className="h-1 w-2/3 bg-stone-200 dark:bg-stone-800 rounded" />
+                        </div>
+                        <div className="border-t border-dashed border-stone-200 dark:border-stone-800 pt-2 flex justify-between items-center">
+                          <div className="h-1 w-8 bg-blue-100 dark:bg-blue-900 rounded" />
+                          <CheckCircle2 className="h-3 w-3 text-emerald-500" />
+                        </div>
                       </div>
-                      <div className="border-t border-dashed border-stone-200 dark:border-stone-800 pt-2 flex justify-between items-center">
-                        <div className="h-1 w-8 bg-blue-100 dark:bg-blue-900 rounded" />
-                        <CheckCircle2 className="h-3 w-3 text-emerald-500" />
-                      </div>
-                    </div>
 
-                    <div className="space-y-2">
-                      <h4 className="font-sans text-sm font-semibold text-stone-800 dark:text-stone-300">
-                        {activePdf ? activePdf.name : 'PDF Document'}
-                      </h4>
-                      <p className="font-sans text-xs text-stone-500 dark:text-stone-500 max-w-sm mx-auto leading-normal">
-                        Ready for text & formatting extraction. Adjust target format and options in the right settings panel.
-                      </p>
-                    </div>
+                      <div className="space-y-2">
+                        <h4 className="font-sans text-sm font-semibold text-stone-800 dark:text-stone-300">
+                          {activePdf ? activePdf.name : 'PDF Document'}
+                        </h4>
+                        <p className="font-sans text-xs text-stone-500 dark:text-stone-500 max-w-sm mx-auto leading-normal">
+                          Ready for text & formatting extraction. Adjust target format and options in the right settings panel.
+                        </p>
+                      </div>
 
-                    <button
-                      type="button"
-                      onClick={triggerBrowse}
-                      className="px-4 py-2 border border-stone-300 dark:border-stone-800 bg-white hover:bg-stone-50 dark:bg-stone-900 dark:hover:bg-stone-800 rounded-lg font-sans text-xs font-semibold text-stone-700 dark:text-stone-300 cursor-pointer focus:outline-none transition-colors"
-                    >
-                      Change PDF
-                    </button>
-                  </div>
-                </div>
-              )}
+                      <button
+                        type="button"
+                        onClick={triggerBrowse}
+                        className="px-4 py-2 border border-stone-300 dark:border-stone-800 bg-white hover:bg-stone-50 dark:bg-stone-900 dark:hover:bg-stone-800 rounded-lg font-sans text-xs font-semibold text-stone-700 dark:text-stone-300 cursor-pointer focus:outline-none transition-colors"
+                      >
+                        Change PDF
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
             
           </div>

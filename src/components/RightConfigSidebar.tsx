@@ -159,176 +159,80 @@ export default function RightConfigSidebar({
               <span className="font-sans text-[10px] uppercase font-semibold tracking-wider">Export Settings</span>
             </div>
 
-            {isImageMode ? (
-              /* Image mode options */
-              <div className="space-y-4">
-                {/* PDF Output Name */}
-                <div className="space-y-1">
-                  <label htmlFor="pdf-title-input" className="font-sans text-[10px] uppercase text-stone-500 dark:text-stone-500 font-semibold block">
-                    File Name
-                  </label>
-                  <input
-                    id="pdf-title-input"
-                    type="text"
-                    value={pdfOptions.pdfTitle}
-                    onChange={(e) => updatePdfOption('pdfTitle', e.target.value)}
-                    placeholder="Enter output name"
-                    disabled={isConverting}
-                    className="w-full px-3 py-1.5 bg-transparent border border-stone-200 dark:border-stone-800 rounded font-sans text-xs text-stone-900 dark:text-stone-100 focus:outline-none focus:border-stone-400 dark:focus:border-stone-600 focus:ring-1 focus:ring-stone-500/20 disabled:opacity-50"
-                  />
-                </div>
-
-                {/* Page Format */}
-                <div className="space-y-1">
-                  <label className="font-sans text-[10px] uppercase text-stone-500 dark:text-stone-500 font-semibold block">
-                    Page Size
-                  </label>
-                  <div className="grid grid-cols-3 gap-1">
-                    {[
-                      { id: 'a4', label: 'A4' },
-                      { id: 'letter', label: 'Letter' },
-                      { id: 'fit', label: 'Fit Photo' }
-                    ].map((item) => (
-                      <button
-                        key={item.id}
-                        type="button"
-                        onClick={() => !isConverting && updatePdfOption('pageFormat', item.id as any)}
-                        className={`py-1 text-[10px] font-semibold rounded border cursor-pointer text-center focus:outline-none transition-colors truncate ${
-                          pdfOptions.pageFormat === item.id
-                            ? 'bg-blue-600/10 border-blue-500 text-blue-600 dark:bg-blue-500/10 dark:border-blue-400 dark:text-blue-400 font-semibold shadow-xs'
-                            : 'bg-white border-stone-200 text-stone-600 hover:border-stone-400 dark:bg-stone-900 dark:border-stone-800 dark:text-stone-400 dark:hover:border-stone-700'
-                        }`}
-                        title={item.id === 'a4' ? 'A4 Size (210 × 297 mm)' : item.id === 'letter' ? 'US Letter (8.5 × 11 in)' : 'Page matches each original photo aspect ratio'}
-                      >
-                        {item.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Orientation */}
-                <div className="space-y-1">
-                  <label className="font-sans text-[10px] uppercase text-stone-500 dark:text-stone-500 font-semibold block">
-                    Orientation
-                  </label>
-                  <div className="grid grid-cols-3 gap-1">
-                    {[
-                      { id: 'portrait', label: 'Portrait' },
-                      { id: 'landscape', label: 'Landscape' },
-                      { id: 'auto', label: 'Auto Fit' }
-                    ].map((item) => (
-                      <button
-                        key={item.id}
-                        type="button"
-                        onClick={() => !isConverting && updatePdfOption('orientation', item.id as any)}
-                        className={`py-1 text-[10px] font-semibold rounded border cursor-pointer text-center focus:outline-none transition-colors truncate ${
-                          pdfOptions.orientation === item.id
-                            ? 'bg-blue-600/10 border-blue-500 text-blue-600 dark:bg-blue-500/10 dark:border-blue-400 dark:text-blue-400 font-semibold shadow-xs'
-                            : 'bg-white border-stone-200 text-stone-600 hover:border-stone-400 dark:bg-stone-900 dark:border-stone-800 dark:text-stone-400 dark:hover:border-stone-700'
-                        }`}
-                      >
-                        {item.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* White Border Margins */}
-                <div className="space-y-1">
-                  <label className="font-sans text-[10px] uppercase text-stone-500 dark:text-stone-500 font-semibold block">
-                    Borders
-                  </label>
-                  <div className="grid grid-cols-3 gap-1">
-                    {[
-                      { id: 0, label: 'None' },
-                      { id: 10, label: 'Thin' },
-                      { id: 20, label: 'Standard' }
-                    ].map((item) => (
-                      <button
-                        key={item.id}
-                        type="button"
-                        onClick={() => !isConverting && updatePdfOption('margin', item.id as any)}
-                        className={`py-1 text-[10px] font-semibold rounded border cursor-pointer text-center focus:outline-none transition-colors truncate ${
-                          pdfOptions.margin === item.id
-                            ? 'bg-blue-600/10 border-blue-500 text-blue-600 dark:bg-blue-500/10 dark:border-blue-400 dark:text-blue-400 font-semibold shadow-xs'
-                            : 'bg-white border-stone-200 text-stone-600 hover:border-stone-400 dark:bg-stone-900 dark:border-stone-800 dark:text-stone-400 dark:hover:border-stone-700'
-                        }`}
-                      >
-                        {item.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* PDF Compression Quality slider */}
-                <div className="space-y-1.5 pt-1">
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="font-sans text-stone-600 dark:text-stone-400 font-semibold text-[10px] uppercase tracking-wider">Image Quality</span>
-                    <span className="font-mono text-stone-800 dark:text-stone-200 font-semibold text-xs">{Math.round(pdfOptions.quality * 100)}%</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="0.5"
-                    max="1.0"
-                    step="0.05"
-                    value={pdfOptions.quality}
-                    onChange={(e) => updatePdfOption('quality', parseFloat(e.target.value))}
-                    disabled={isConverting}
-                    className="w-full h-1 accent-stone-900 dark:accent-stone-100 cursor-pointer disabled:opacity-50"
-                  />
-                </div>
-              </div>
-            ) : (
-              /* PDF mode options */
-              <div className="space-y-4">
-                {/* Target Format */}
-                <div className="space-y-1">
-                  <label className="font-sans text-[10px] uppercase text-stone-500 dark:text-stone-500 font-semibold block">
-                    Output Format
-                  </label>
-                  <div className="grid grid-cols-2 gap-1.5">
-                    {[
-                      { id: 'txt', label: 'Plain Text (.txt)' },
-                      { id: 'md', label: 'Markdown (.md)' },
-                      { id: 'png', label: 'PNG Pages (.zip)' },
-                      { id: 'jpeg', label: 'JPEG Pages (.zip)' }
-                    ].map((item) => (
-                      <button
-                        key={item.id}
-                        type="button"
-                        onClick={() => !isConverting && updateFormatOption('targetFormat', item.id as any)}
-                        className={`py-1.5 text-[10px] font-semibold rounded border cursor-pointer text-center focus:outline-none transition-colors leading-tight ${
-                          formatOptions.targetFormat === item.id
-                            ? 'bg-blue-600/10 border-blue-500 text-blue-600 dark:bg-blue-500/10 dark:border-blue-400 dark:text-blue-400 font-semibold shadow-xs'
-                            : 'bg-white border-stone-200 text-stone-600 hover:border-stone-400 dark:bg-stone-900 dark:border-stone-800 dark:text-stone-400 dark:hover:border-stone-700'
-                        }`}
-                      >
-                        {item.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Resolution scale (only for image formats) */}
-                {(formatOptions.targetFormat === 'png' || formatOptions.targetFormat === 'jpeg') && (
+            <AnimatePresence mode="wait" initial={false}>
+              {isImageMode ? (
+                /* Image mode options */
+                <motion.div
+                  key="image-mode-options"
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -5 }}
+                  transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                  className="space-y-4"
+                >
+                  {/* PDF Output Name */}
                   <div className="space-y-1">
-                    <label className="font-sans text-[10px] uppercase text-stone-400 dark:text-stone-500 font-semibold block">
-                      Image Resolution
+                    <label htmlFor="pdf-title-input" className="font-sans text-[10px] uppercase text-stone-500 dark:text-stone-500 font-semibold block">
+                      File Name
+                    </label>
+                    <input
+                      id="pdf-title-input"
+                      type="text"
+                      value={pdfOptions.pdfTitle}
+                      onChange={(e) => updatePdfOption('pdfTitle', e.target.value)}
+                      placeholder="Enter output name"
+                      disabled={isConverting}
+                      className="w-full px-3 py-1.5 bg-transparent border border-stone-200 dark:border-stone-800 rounded font-sans text-xs text-stone-900 dark:text-stone-100 focus:outline-none focus:border-stone-400 dark:focus:border-stone-600 focus:ring-1 focus:ring-stone-500/20 disabled:opacity-50"
+                    />
+                  </div>
+
+                  {/* Page Format */}
+                  <div className="space-y-1">
+                    <label className="font-sans text-[10px] uppercase text-stone-500 dark:text-stone-500 font-semibold block">
+                      Page Size
                     </label>
                     <div className="grid grid-cols-3 gap-1">
                       {[
-                        { id: 1, label: '72 DPI (Standard)' },
-                        { id: 2, label: '150 DPI (High)' },
-                        { id: 3, label: '300 DPI (Print)' }
+                        { id: 'a4', label: 'A4' },
+                        { id: 'letter', label: 'Letter' },
+                        { id: 'fit', label: 'Fit Photo' }
                       ].map((item) => (
                         <button
                           key={item.id}
                           type="button"
-                          onClick={() => !isConverting && updateFormatOption('resolutionScale', item.id as any)}
-                          className={`w-full py-1 text-[9px] font-semibold rounded border cursor-pointer text-center focus:outline-none transition-colors truncate ${
-                            formatOptions.resolutionScale === item.id
+                          onClick={() => !isConverting && updatePdfOption('pageFormat', item.id as any)}
+                          className={`py-1 text-[10px] font-semibold rounded border cursor-pointer text-center focus:outline-none transition-colors truncate ${
+                            pdfOptions.pageFormat === item.id
                               ? 'bg-blue-600/10 border-blue-500 text-blue-600 dark:bg-blue-500/10 dark:border-blue-400 dark:text-blue-400 font-semibold shadow-xs'
-                              : 'border-stone-200/70 hover:border-stone-400 dark:border-stone-800 bg-stone-50/15 text-stone-700 dark:text-stone-300'
+                              : 'bg-white border-stone-200 text-stone-600 hover:border-stone-400 dark:bg-stone-900 dark:border-stone-800 dark:text-stone-400 dark:hover:border-stone-700'
+                          }`}
+                          title={item.id === 'a4' ? 'A4 Size (210 × 297 mm)' : item.id === 'letter' ? 'US Letter (8.5 × 11 in)' : 'Page matches each original photo aspect ratio'}
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Orientation */}
+                  <div className="space-y-1">
+                    <label className="font-sans text-[10px] uppercase text-stone-500 dark:text-stone-500 font-semibold block">
+                      Orientation
+                    </label>
+                    <div className="grid grid-cols-3 gap-1">
+                      {[
+                        { id: 'portrait', label: 'Portrait' },
+                        { id: 'landscape', label: 'Landscape' },
+                        { id: 'auto', label: 'Auto Fit' }
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => !isConverting && updatePdfOption('orientation', item.id as any)}
+                          className={`py-1 text-[10px] font-semibold rounded border cursor-pointer text-center focus:outline-none transition-colors truncate ${
+                            pdfOptions.orientation === item.id
+                              ? 'bg-blue-600/10 border-blue-500 text-blue-600 dark:bg-blue-500/10 dark:border-blue-400 dark:text-blue-400 font-semibold shadow-xs'
+                              : 'bg-white border-stone-200 text-stone-600 hover:border-stone-400 dark:bg-stone-900 dark:border-stone-800 dark:text-stone-400 dark:hover:border-stone-700'
                           }`}
                         >
                           {item.label}
@@ -336,25 +240,137 @@ export default function RightConfigSidebar({
                       ))}
                     </div>
                   </div>
-                )}
 
-                {/* Page Range */}
-                <div className="space-y-1">
-                  <label htmlFor="page-range-input" className="font-sans text-[10px] uppercase text-stone-500 dark:text-stone-500 font-semibold block">
-                    Page Range
-                  </label>
-                  <input
-                    id="page-range-input"
-                    type="text"
-                    value={formatOptions.pageRange}
-                    onChange={(e) => updateFormatOption('pageRange', e.target.value)}
-                    placeholder="e.g. 'all' or '1, 3, 5-8'"
-                    disabled={isConverting}
-                    className="w-full px-3 py-1.5 bg-transparent border border-stone-200 dark:border-stone-800 rounded font-sans text-xs text-stone-900 dark:text-stone-100 focus:outline-none focus:border-stone-400 dark:focus:border-stone-600 focus:ring-1 focus:ring-stone-500/20 disabled:opacity-50"
-                  />
-                </div>
-              </div>
-            )}
+                  {/* White Border Margins */}
+                  <div className="space-y-1">
+                    <label className="font-sans text-[10px] uppercase text-stone-500 dark:text-stone-500 font-semibold block">
+                      Borders
+                    </label>
+                    <div className="grid grid-cols-3 gap-1">
+                      {[
+                        { id: 0, label: 'None' },
+                        { id: 10, label: 'Thin' },
+                        { id: 20, label: 'Standard' }
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => !isConverting && updatePdfOption('margin', item.id as any)}
+                          className={`py-1 text-[10px] font-semibold rounded border cursor-pointer text-center focus:outline-none transition-colors truncate ${
+                            pdfOptions.margin === item.id
+                              ? 'bg-blue-600/10 border-blue-500 text-blue-600 dark:bg-blue-500/10 dark:border-blue-400 dark:text-blue-400 font-semibold shadow-xs'
+                              : 'bg-white border-stone-200 text-stone-600 hover:border-stone-400 dark:bg-stone-900 dark:border-stone-800 dark:text-stone-400 dark:hover:border-stone-700'
+                          }`}
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* PDF Compression Quality slider */}
+                  <div className="space-y-1.5 pt-1">
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="font-sans text-stone-600 dark:text-stone-400 font-semibold text-[10px] uppercase tracking-wider">Image Quality</span>
+                      <span className="font-mono text-stone-800 dark:text-stone-200 font-semibold text-xs">{Math.round(pdfOptions.quality * 100)}%</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0.5"
+                      max="1.0"
+                      step="0.05"
+                      value={pdfOptions.quality}
+                      onChange={(e) => updatePdfOption('quality', parseFloat(e.target.value))}
+                      disabled={isConverting}
+                      className="w-full h-1 accent-stone-900 dark:accent-stone-100 cursor-pointer disabled:opacity-50"
+                    />
+                  </div>
+                </motion.div>
+              ) : (
+                /* PDF mode options */
+                <motion.div
+                  key="pdf-mode-options"
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -5 }}
+                  transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                  className="space-y-4"
+                >
+                  {/* Target Format */}
+                  <div className="space-y-1">
+                    <label className="font-sans text-[10px] uppercase text-stone-500 dark:text-stone-500 font-semibold block">
+                      Output Format
+                    </label>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {[
+                        { id: 'txt', label: 'Plain Text (.txt)' },
+                        { id: 'md', label: 'Markdown (.md)' },
+                        { id: 'png', label: 'PNG Pages (.zip)' },
+                        { id: 'jpeg', label: 'JPEG Pages (.zip)' }
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => !isConverting && updateFormatOption('targetFormat', item.id as any)}
+                          className={`py-1.5 text-[10px] font-semibold rounded border cursor-pointer text-center focus:outline-none transition-colors leading-tight ${
+                            formatOptions.targetFormat === item.id
+                              ? 'bg-blue-600/10 border-blue-500 text-blue-600 dark:bg-blue-500/10 dark:border-blue-400 dark:text-blue-400 font-semibold shadow-xs'
+                              : 'bg-white border-stone-200 text-stone-600 hover:border-stone-400 dark:bg-stone-900 dark:border-stone-800 dark:text-stone-400 dark:hover:border-stone-700'
+                          }`}
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Resolution scale (only for image formats) */}
+                  {(formatOptions.targetFormat === 'png' || formatOptions.targetFormat === 'jpeg') && (
+                    <div className="space-y-1">
+                      <label className="font-sans text-[10px] uppercase text-stone-400 dark:text-stone-500 font-semibold block">
+                        Image Resolution
+                      </label>
+                      <div className="grid grid-cols-3 gap-1">
+                        {[
+                          { id: 1, label: '72 DPI (Standard)' },
+                          { id: 2, label: '150 DPI (High)' },
+                          { id: 3, label: '300 DPI (Print)' }
+                        ].map((item) => (
+                          <button
+                            key={item.id}
+                            type="button"
+                            onClick={() => !isConverting && updateFormatOption('resolutionScale', item.id as any)}
+                            className={`w-full py-1 text-[9px] font-semibold rounded border cursor-pointer text-center focus:outline-none transition-colors truncate ${
+                              formatOptions.resolutionScale === item.id
+                                ? 'bg-blue-600/10 border-blue-500 text-blue-600 dark:bg-blue-500/10 dark:border-blue-400 dark:text-blue-400 font-semibold shadow-xs'
+                                : 'border-stone-200/70 hover:border-stone-400 dark:border-stone-800 bg-stone-50/15 text-stone-700 dark:text-stone-300'
+                            }`}
+                          >
+                            {item.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Page Range */}
+                  <div className="space-y-1">
+                    <label htmlFor="page-range-input" className="font-sans text-[10px] uppercase text-stone-500 dark:text-stone-500 font-semibold block">
+                      Page Range
+                    </label>
+                    <input
+                      id="page-range-input"
+                      type="text"
+                      value={formatOptions.pageRange}
+                      onChange={(e) => updateFormatOption('pageRange', e.target.value)}
+                      placeholder="e.g. 'all' or '1, 3, 5-8'"
+                      disabled={isConverting}
+                      className="w-full px-3 py-1.5 bg-transparent border border-stone-200 dark:border-stone-800 rounded font-sans text-xs text-stone-900 dark:text-stone-100 focus:outline-none focus:border-stone-400 dark:focus:border-stone-600 focus:ring-1 focus:ring-stone-500/20 disabled:opacity-50"
+                    />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           <hr className="border-stone-100/60 dark:border-stone-900/40" />
