@@ -1,9 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Newsreader:ital,opsz,wght@1,6..72,400;1,6..72,500&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:ital,opsz,wght@1,6..72,400;1,6..72,500;1,600;1,700&family=JetBrains+Mono:wght@400;500;700&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Newsreader", "Playfair Display", ui-serif, Georgia, serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-brand: "Newsreader", "Playfair Display", ui-serif, Georgia, serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 }
 
@@ -13,18 +13,60 @@
   }
 }
 
-/* Custom fine-line scrollbar for queue list */
+/* Custom fine-line scrollbar for all scrollable elements */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(120, 113, 108, 0.25) transparent;
+}
+
+/* Chrome, Edge, Safari scrollbar configuration */
 ::-webkit-scrollbar {
-  width: 4px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(120, 113, 108, 0.2);
-  border-radius: 2px;
+  background: rgba(120, 113, 108, 0.25);
+  border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(120, 113, 108, 0.4);
+  background: rgba(120, 113, 108, 0.45);
 }
+
+/* Sleek overlay scrollbars for sidebars to prevent layout shifts or content squeezing */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(120, 113, 108, 0.25) transparent;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+@supports (overflow: overlay) or (-webkit-overflow-scrolling: touch) {
+  .custom-scrollbar {
+    overflow-y: overlay;
+  }
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(120, 113, 108, 0.22);
+  border-radius: 9999px;
+  border: 1.5px solid transparent;
+  background-clip: padding-box;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(120, 113, 108, 0.45);
+}
+
 

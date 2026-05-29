@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { FileText, AlertCircle, FileCode, CheckCircle, Info, Upload, Image, ArrowLeft, RefreshCw, Layers, Sparkles, Shield, Settings, FilePlus } from 'lucide-react';
+import { FileText, AlertCircle, FileCode, CheckCircle, Info, Upload, Image, ArrowLeft, RefreshCw, Layers, Sparkles, Shield, Settings, FilePlus, X } from 'lucide-react';
 
 import {
   FiloFile,
@@ -16,9 +16,9 @@ import {
 } from './types';
 
 import ThemeToggle from './components/ThemeToggle';
-import FileQueueSidebar from './components/FileQueueSidebar';
+import LeftToolsSidebar from './components/LeftToolsSidebar';
 import CoreWorkbench from './components/CoreWorkbench';
-import ConfigPanel from './components/ConfigPanel';
+import RightConfigSidebar from './components/RightConfigSidebar';
 import ConversionOverview from './components/ConversionOverview';
 
 import { compileImagesToPdf } from './utils/converter';
@@ -454,32 +454,57 @@ export default function App() {
       }
     } catch (err: any) {
       console.error(err);
-      setConversionError(err.message || 'Verification fail on processing binary headers.');
+      setConversionError(err.message || 'Unable to read the PDF file. It may be corrupted or password-protected.');
       setFiles(prev => prev.map(f => f.status === 'converting' ? { ...f, status: 'failed' } : f));
     } finally {
       setIsConverting(false);
     }
   };
 
+  const isWorkspaceActive = files.length > 0;
+
   return (
-    <div className="min-h-screen bg-[#fcfbfa] dark:bg-[#0c0a09] text-[#1c1917] dark:text-[#f5f5f4] editorial-transition font-sans flex flex-col justify-between">
+    <div className={`relative bg-[#fcfbfa] dark:bg-[#0c0a09] text-[#1c1917] dark:text-[#f5f5f4] editorial-transition font-sans flex flex-col ${
+      isWorkspaceActive ? 'h-screen overflow-hidden' : 'min-h-screen justify-between'
+    }`}>
+      {/* Ambient background glows to create a deep, premium editorial atmosphere */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+        <div 
+          className="absolute -top-[30%] left-1/2 -translate-x-1/2 w-[80%] h-[60%] opacity-70 dark:opacity-40 blur-[120px]" 
+          style={{ background: 'radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%)' }}
+        />
+        <div 
+          className="absolute -bottom-[20%] left-[10%] w-[50%] h-[50%] opacity-50 dark:opacity-30 blur-[100px]" 
+          style={{ background: 'radial-gradient(circle, rgba(120, 113, 108, 0.1) 0%, transparent 70%)' }}
+        />
+      </div>
+
       
       {/* Sleek Editorial Header */}
-      <header className="border-b border-stone-200 dark:border-stone-800 bg-[#fcfbfa]/80 dark:bg-[#0c0a09]/80 backdrop-blur-md sticky top-0 z-30">
-        <div className="w-full max-w-[1440px] mx-auto px-6 lg:px-8 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <h1 className="font-sans text-xl font-bold tracking-tight text-stone-900 dark:text-stone-100">
-              Filo
-            </h1>
-            <span className="text-stone-300 dark:text-stone-700">/</span>
-            <span className="font-serif italic text-xs text-stone-500 dark:text-stone-400 font-medium">
-              {files.length > 0 ? 'Studio Workspace Active' : 'Convert documents simply.'}
-            </span>
-          </div>
+      <AnimatePresence>
+        {!isWorkspaceActive && (
+          <motion.header
+            initial={{ opacity: 0, y: -60 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -60 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            className="border-b border-stone-200 dark:border-stone-800 bg-[#fcfbfa]/80 dark:bg-[#0c0a09]/80 backdrop-blur-md sticky top-0 z-30 w-full"
+          >
+            <div className="w-full max-w-[1440px] mx-auto px-6 lg:px-8 py-4 flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <div className="h-7 w-7 rounded-lg bg-blue-600 dark:bg-blue-500 flex items-center justify-center shadow-xs select-none">
+                  <FileText className="h-4 w-4 text-white" strokeWidth={2} />
+                </div>
+                <h1 className="font-brand italic text-2xl font-bold tracking-tight text-stone-900 dark:text-stone-100">
+                  Filo
+                </h1>
+              </div>
 
-          <ThemeToggle isDark={isDark} toggleTheme={toggleTheme} />
-        </div>
-      </header>
+              <ThemeToggle isDark={isDark} toggleTheme={toggleTheme} />
+            </div>
+          </motion.header>
+        )}
+      </AnimatePresence>
 
       {/* Main Content Body */}
       <AnimatePresence mode="wait">
@@ -489,21 +514,21 @@ export default function App() {
              ========================================================= */
           <motion.div
             key="landing-view"
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -5 }}
-            transition={{ duration: 0.3 }}
+            initial={{ opacity: 0, scale: 0.985, y: 8 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.985, y: -8 }}
+            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
             className="flex-grow flex flex-col justify-center"
           >
             <main className="w-full max-w-[1440px] mx-auto px-6 lg:px-8 py-10 md:py-16 space-y-12">
               
               {/* Editorial Subheader Banner / Hero Statement */}
               <div className="text-center max-w-4xl mx-auto space-y-4">
-                <h2 className="font-serif italic text-3xl md:text-5xl text-stone-800 dark:text-stone-200 leading-tight font-normal">
-                  Convert, fit, and extract files with <span className="underline decoration-stone-300 dark:decoration-stone-700 underline-offset-4">absolute privacy</span>.
+                <h2 className="font-sans text-4xl md:text-6xl font-bold tracking-tight text-stone-900 dark:text-stone-100 leading-tight">
+                  Convert and extract documents with <span className="font-brand italic font-semibold text-blue-600 dark:text-blue-400">absolute privacy</span>.
                 </h2>
-                <p className="font-sans text-xs md:text-sm text-stone-600 dark:text-stone-400 max-w-2xl mx-auto leading-relaxed">
-                  Combine camera images and paper scans into clean printable PDFs, or transpile PDF textbooks into editable markdown study notes - powered entirely in your browser with zero server uploads.
+                <p className="font-sans text-xs md:text-sm text-stone-500 dark:text-stone-400 max-w-2xl mx-auto leading-relaxed">
+                  Combine images into printable PDFs or extract clean text and markdown formatting from PDF documents. Everything runs privately in your browser—your files never touch a server.
                 </p>
               </div>
 
@@ -527,30 +552,61 @@ export default function App() {
                   onDragLeave={handleLandingDrag}
                   onDrop={handleLandingDrop}
                   onClick={triggerLandingBrowse}
-                  className={`border border-dashed p-10 md:p-14 rounded-xl cursor-pointer text-center select-none transition-all flex flex-col items-center justify-center space-y-5 ${
+                  className={`border border-dashed backdrop-blur-md p-10 md:p-14 rounded-2xl cursor-pointer text-center select-none transition-all duration-300 flex flex-col items-center justify-center space-y-5 ${
                     isLandingDragOver
-                      ? 'border-blue-500 bg-stone-50 dark:bg-stone-900/60 shadow-lg scale-[1.01]'
-                      : 'border-stone-250 dark:border-stone-800 hover:border-stone-400 dark:hover:border-stone-700 bg-white/80 dark:bg-[#0c0a09]/80 shadow-xs'
+                      ? 'border-blue-500 bg-blue-50/10 dark:bg-blue-950/15 shadow-md scale-[1.01]'
+                      : 'border-stone-300 dark:border-stone-800/60 hover:border-blue-500/50 dark:hover:border-blue-500/40 bg-white/40 dark:bg-stone-950/20 hover:bg-white/60 dark:hover:bg-stone-950/30 shadow-xs hover:shadow-sm'
                   }`}
                 >
-                  <div className="p-4 rounded-full border border-stone-150 dark:border-stone-850 bg-stone-50/50 dark:bg-stone-900 flex items-center justify-center text-stone-700 dark:text-stone-300">
-                    <Upload className="h-6 w-6 animate-bounce" strokeWidth={1.5} />
+                  <div className="p-4 rounded-full border border-stone-200/30 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-xs flex items-center justify-center text-stone-700 dark:text-stone-300 transition-colors">
+                    <Upload className="h-6 w-6 text-blue-600 dark:text-blue-400" strokeWidth={1.5} />
                   </div>
 
                   <div className="space-y-1.5">
-                    <span className="font-serif italic text-base block text-stone-800 dark:text-stone-200">
-                      Drag and drop files here to launch Studio
+                    <span className="font-sans font-semibold text-base block text-stone-800 dark:text-stone-200">
+                      Drag and drop files here to start
                     </span>
-                    <span className="font-sans text-xs text-stone-500 dark:text-stone-405 block max-w-sm mx-auto leading-normal">
-                      Upload one or more <strong className="text-stone-750 dark:text-stone-200">images</strong> to compile to PDF, or a <strong className="text-stone-750 dark:text-stone-200">PDF file</strong> to extract study notes, content, & images. Or <span className="underline font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500">click to browse</span>.
+                    <span className="font-sans text-xs text-stone-500 dark:text-stone-400 block max-w-sm mx-auto leading-normal">
+                      Add <strong className="text-stone-700 dark:text-stone-200">images</strong> to create a PDF, or a <strong className="text-stone-700 dark:text-stone-200">PDF document</strong> to extract its text. Or <span className="underline font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-500">click to browse</span>.
                     </span>
                   </div>
 
                   <div className="pt-1">
-                    <span className="inline-block px-3 py-1 bg-stone-100 dark:bg-stone-900 rounded font-mono text-[9px] text-stone-500 dark:text-stone-400 font-bold uppercase tracking-widest">
-                      PDF, PNG, JPEG, JPG, WEBP • client-side sandboxed
+                    <span className="inline-block px-3 py-1 bg-stone-100 dark:bg-stone-900 rounded font-sans text-[10px] text-stone-500 dark:text-stone-400 font-semibold tracking-wide">
+                      Supports PDF, PNG, JPG, and WebP
                     </span>
                   </div>
+                </div>
+              </div>
+
+              {/* Quick Feature Guides */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto pt-4 relative z-10">
+                <div className="p-5 bg-white/35 dark:bg-stone-950/15 backdrop-blur-md border border-stone-200/50 dark:border-stone-800/30 rounded-2xl space-y-2.5 transition-all duration-300 hover:bg-white/55 dark:hover:bg-stone-950/25">
+                  <div className="flex items-center space-x-2.5">
+                    <div className="p-2 rounded-lg bg-blue-600/10 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400 flex items-center justify-center">
+                      <Image className="h-4 w-4" />
+                    </div>
+                    <h3 className="font-sans text-xs font-bold uppercase tracking-wider text-stone-800 dark:text-stone-200">
+                      Create PDFs
+                    </h3>
+                  </div>
+                  <p className="font-sans text-[11px] leading-relaxed text-stone-500 dark:text-stone-400">
+                    Compile multiple images (PNG, JPG, WebP) into structured, high-quality PDFs. Adjust page settings (A4, Letter, or Fit), margins, orientation, and crop elements in real-time.
+                  </p>
+                </div>
+
+                <div className="p-5 bg-white/35 dark:bg-stone-950/15 backdrop-blur-md border border-stone-200/50 dark:border-stone-800/30 rounded-2xl space-y-2.5 transition-all duration-300 hover:bg-white/55 dark:hover:bg-stone-950/25">
+                  <div className="flex items-center space-x-2.5">
+                    <div className="p-2 rounded-lg bg-emerald-600/10 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 flex items-center justify-center">
+                      <FileText className="h-4 w-4" />
+                    </div>
+                    <h3 className="font-sans text-xs font-bold uppercase tracking-wider text-stone-800 dark:text-stone-200">
+                      Extract Content
+                    </h3>
+                  </div>
+                  <p className="font-sans text-[11px] leading-relaxed text-stone-500 dark:text-stone-400">
+                    Pull structured text and layout directories out of PDF files. Convert documents directly into Markdown notes or clean Plain Text, choosing custom page ranges.
+                  </p>
                 </div>
               </div>
 
@@ -558,43 +614,20 @@ export default function App() {
           </motion.div>
         ) : (
           /* =========================================================
-             VIEW 2: DUST-FREE HIGH-FIDELITY STUDIO WORKSPACE GRID
+             VIEW 2: WORKSPACE GRID
              ========================================================= */
           <motion.div
-            key="studio-view"
-            initial={{ opacity: 0, scale: 0.995 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.995 }}
-            transition={{ duration: 0.35 }}
-            className="flex-grow flex flex-col pt-4 md:pt-6"
+            key="workspace-view"
+            initial={{ opacity: 0, scale: 0.985, y: 8 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.985, y: -8 }}
+            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+            className="flex-grow flex flex-col min-h-0 overflow-hidden"
           >
-            <main className="w-full max-w-[1440px] mx-auto px-6 lg:px-8 space-y-6">
-              
-              {/* Active Workspace Action Bar Header */}
-              <div className="border border-stone-200 dark:border-stone-800 bg-[#fcfbfa]/80 dark:bg-[#0c0a09]/85 p-3.5 rounded-lg flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs">
-                <div className="flex items-center space-x-3 text-stone-600 dark:text-stone-400">
-                  <button
-                    type="button"
-                    onClick={handleReset}
-                    className="px-3 py-1.5 border border-stone-250 dark:border-stone-805 bg-white hover:bg-stone-50 dark:bg-stone-900 dark:hover:bg-stone-800 rounded font-sans text-xs font-bold text-stone-750 dark:text-stone-300 flex items-center space-x-1 px-3 py-1 cursor-pointer focus:outline-none transition-colors"
-                  >
-                    <ArrowLeft className="h-3.5 w-3.5" />
-                    <span>Clear & Exit Studio</span>
-                  </button>
-                  <span className="text-stone-200 dark:text-stone-800">|</span>
-                  <div className="font-mono text-[9px] uppercase tracking-widest text-stone-500 dark:text-stone-400">
-                    ACTIVE SATELLITE: <strong className="text-stone-800 dark:text-white">{mode === 'images-to-pdf' ? 'PHOTOS COMPILER' : 'PDF EXTRACTION TOOL'}</strong>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-1.5 font-mono text-[9px] uppercase tracking-widest text-stone-450">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span>Secure Local sandbox session active</span>
-                </div>
-              </div>
+            <main className="flex-1 min-h-0 flex flex-col w-full h-full p-4 space-y-4 overflow-hidden">
 
               {/* Dynamic Client-Side Converter Action Container */}
-              <div className="space-y-6">
+              <div className="flex-1 min-h-0 flex flex-col space-y-4 overflow-hidden">
                 
                 {/* Conversion Loading Progress Overlay */}
                 <AnimatePresence>
@@ -625,7 +658,7 @@ export default function App() {
                       </div>
 
                       <div className="flex items-center space-x-2 text-xs text-stone-500 dark:text-stone-400 font-medium">
-                        <span className="w-1.5 h-1.5 rounded-full bg-blue-505 animate-ping" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-ping" />
                         <span className="truncate">{conversionStep}</span>
                       </div>
                     </motion.div>
@@ -645,7 +678,6 @@ export default function App() {
                     </div>
                   )}
                 </AnimatePresence>
-
                 {/* Conversion Error Alerts */}
                 <AnimatePresence>
                   {conversionError && (
@@ -654,36 +686,51 @@ export default function App() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
-                      className="p-4 border border-rose-200 dark:border-rose-950 bg-rose-50/50 dark:bg-rose-955/10 text-rose-800 dark:text-rose-400 rounded-lg flex items-start space-x-3"
+                      className="p-4 border border-rose-200 dark:border-rose-950 bg-rose-50/50 dark:bg-rose-950/10 text-rose-800 dark:text-rose-400 rounded-lg flex items-start justify-between space-x-3"
                     >
-                      <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5 text-rose-600" strokeWidth={1.5} />
-                      <div className="space-y-1">
-                        <h4 className="font-sans text-xs font-bold uppercase tracking-wider">Conversion Interrupted</h4>
-                        <p className="font-sans text-xs leading-relaxed">{conversionError}</p>
+                      <div className="flex items-start space-x-3">
+                        <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5 text-rose-600 dark:text-rose-400" strokeWidth={1.5} />
+                        <div className="space-y-1">
+                          <h4 className="font-sans text-xs font-bold uppercase tracking-wider">Conversion Interrupted</h4>
+                          <p className="font-sans text-xs leading-relaxed">{conversionError}</p>
+                        </div>
                       </div>
+                      <button
+                        type="button"
+                        onClick={() => setConversionError(null)}
+                        className="p-1 rounded-md hover:bg-rose-100 dark:hover:bg-rose-950/30 text-rose-500 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-200 transition-colors cursor-pointer focus:outline-none"
+                        aria-label="Dismiss error"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
                     </motion.div>
                   )}
                 </AnimatePresence>
 
                 {/* Sidebar Left, Main Core, Sidebar Right 3-Column Layout */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch pb-6 lg:h-[calc(100vh-210px)] lg:min-h-[660px] lg:max-h-[900px]">
+                <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch pb-4 overflow-hidden">
                   
                   {/* Column 1: Document Queue Drawer & Add tools (Left Sidebar) */}
-                  <div className="lg:col-span-3 flex flex-col h-full overflow-hidden">
-                    <FileQueueSidebar
-                      files={files}
+                  <div className="lg:col-span-3 flex flex-col h-full min-h-[520px] overflow-hidden">
+                    <LeftToolsSidebar
                       mode={mode}
-                      onFilesAdded={handleFilesAdded}
-                      onRemoveFile={handleRemoveFile}
-                      onMoveUp={handleMoveUp}
-                      onMoveDown={handleMoveDown}
                       activeCropFile={activeCropFile}
-                      setActiveCropFile={handleSelectQueuedFile}
+                      cropAspectRatio={cropAspectRatio}
+                      setCropAspectRatio={setCropAspectRatio}
+                      cropFlipH={cropFlipH}
+                      setCropFlipH={setCropFlipH}
+                      cropFlipV={cropFlipV}
+                      setCropFlipV={setCropFlipV}
+                      cropShowGrid={cropShowGrid}
+                      setCropShowGrid={setCropShowGrid}
+                      onCropReset={handleCropReset}
+                      onCropSave={handleCropSave}
+                      files={files}
                     />
                   </div>
 
                   {/* Column 2: Core Workbench Space (Center Content Canvas) */}
-                  <div className="lg:col-span-5 flex flex-col h-full overflow-y-auto pr-0.5">
+                  <div className="lg:col-span-5 flex flex-col h-full min-h-[520px] overflow-hidden">
                     <CoreWorkbench
                       files={files}
                       mode={mode}
@@ -701,12 +748,13 @@ export default function App() {
                       showGrid={cropShowGrid}
                       setShowGrid={setCropShowGrid}
                       onRegisterActions={registerCropperActions}
+                      onExitWorkspace={handleReset}
                     />
                   </div>
 
                   {/* Column 3: Customization & Parameters Panel (Right Sidebar) - Expanded to col-span-4 to ensure no squeezed margins */}
-                  <div className="lg:col-span-4 flex flex-col h-full overflow-hidden">
-                    <ConfigPanel
+                  <div className="lg:col-span-4 flex flex-col h-full min-h-[520px] overflow-hidden">
+                    <RightConfigSidebar
                       mode={mode}
                       setMode={handleModeChange}
                       pdfOptions={pdfOptions}
@@ -715,18 +763,13 @@ export default function App() {
                       setFormatOptions={setFormatOptions}
                       onConvert={handleConvert}
                       isConverting={isConverting}
-                      hasFiles={files.length > 0}
+                      files={files}
+                      onFilesAdded={handleFilesAdded}
+                      onRemoveFile={handleRemoveFile}
+                      onMoveUp={handleMoveUp}
+                      onMoveDown={handleMoveDown}
                       activeCropFile={activeCropFile}
-                      cropAspectRatio={cropAspectRatio}
-                      setCropAspectRatio={setCropAspectRatio}
-                      cropFlipH={cropFlipH}
-                      setCropFlipH={setCropFlipH}
-                      cropFlipV={cropFlipV}
-                      setCropFlipV={setCropFlipV}
-                      cropShowGrid={cropShowGrid}
-                      setCropShowGrid={setCropShowGrid}
-                      onCropReset={handleCropReset}
-                      onCropSave={handleCropSave}
+                      setActiveCropFile={handleSelectQueuedFile}
                     />
                   </div>
 
@@ -740,18 +783,21 @@ export default function App() {
       </AnimatePresence>
 
       {/* Modern Minimalist Footer */}
-      <footer className="border-t border-stone-200 dark:border-stone-800 py-6 mt-16 bg-stone-50/50 dark:bg-stone-950/30">
-        <div className="w-full max-w-[1440px] mx-auto px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-[10px] text-stone-400 dark:text-stone-650">
-          <div className="flex items-center space-x-2">
-            <span>&copy; 2026 Filo Compiled Engine.</span>
-            <span>|</span>
-            <span>Secure Academic Studio Workspace.</span>
-          </div>
-          <div>
-            <span>No telemetry logs collected • Data completely secure.</span>
-          </div>
-        </div>
-      </footer>
+      <AnimatePresence>
+        {!isWorkspaceActive && (
+          <motion.footer
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 40 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            className="border-t border-stone-200 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-950/30 py-6 mt-16 w-full"
+          >
+            <div className="w-full max-w-[1440px] mx-auto px-6 lg:px-8 text-center font-sans text-[9px] uppercase tracking-widest text-stone-400/80 dark:text-stone-500/80 font-medium">
+              <span>&copy; {new Date().getFullYear()} Filo &bull; 100% Private &bull; Processed Locally (Files Never Leave Your Device)</span>
+            </div>
+          </motion.footer>
+        )}
+      </AnimatePresence>
 
     </div>
   );

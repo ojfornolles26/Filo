@@ -347,19 +347,14 @@ export default function InlineCropper({
     return 'cursor-default';
   };
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (!canvasRef.current) return;
-    const rect = canvasRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / renderSize.width;
-    const y = (e.clientY - rect.top) / renderSize.height;
-
-    const handle = getHitHandle(e.clientX, e.clientY);
+  const startDrag = (clientX: number, clientY: number, hitX: number, hitY: number) => {
+    const handle = getHitHandle(clientX, clientY);
 
     if (handle) {
       setActiveHandle(handle);
       setDragStart({
-        x: e.clientX,
-        y: e.clientY,
+        x: clientX,
+        y: clientY,
         boxX: cropBox.x,
         boxY: cropBox.y,
         boxW: cropBox.w,
@@ -368,29 +363,21 @@ export default function InlineCropper({
     } else {
       setActiveHandle('draw');
       setDragStart({
-        x: e.clientX,
-        y: e.clientY,
-        boxX: x,
-        boxY: y,
+        x: clientX,
+        y: clientY,
+        boxX: hitX,
+        boxY: hitY,
         boxW: 0,
         boxH: 0
       });
     }
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!canvasRef.current) return;
-    
-    if (!activeHandle) {
-      const hit = getHitHandle(e.clientX, e.clientY);
-      setHoverHandle(hit);
-      return;
-    }
+  const moveDrag = (clientX: number, clientY: number) => {
+    if (!activeHandle || !dragStart || !canvasRef.current) return;
 
-    if (!dragStart) return;
-
-    const dx = (e.clientX - dragStart.x) / renderSize.width;
-    const dy = (e.clientY - dragStart.y) / renderSize.height;
+    const dx = (clientX - dragStart.x) / renderSize.width;
+    const dy = (clientY - dragStart.y) / renderSize.height;
 
     let nextX = dragStart.boxX;
     let nextY = dragStart.boxY;
@@ -401,8 +388,8 @@ export default function InlineCropper({
 
     if (activeHandle === 'draw') {
       const rect = canvasRef.current.getBoundingClientRect();
-      const currX = Math.max(0, Math.min(1, (e.clientX - rect.left) / renderSize.width));
-      const currY = Math.max(0, Math.min(1, (e.clientY - rect.top) / renderSize.height));
+      const currX = Math.max(0, Math.min(1, (clientX - rect.left) / renderSize.width));
+      const currY = Math.max(0, Math.min(1, (clientY - rect.top) / renderSize.height));
 
       const startX = dragStart.boxX;
       const startY = dragStart.boxY;
@@ -579,7 +566,49 @@ export default function InlineCropper({
     });
   };
 
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!canvasRef.current) return;
+    const rect = canvasRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / renderSize.width;
+    const y = (e.clientY - rect.top) / renderSize.height;
+    startDrag(e.clientX, e.clientY, x, y);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!canvasRef.current) return;
+    
+    if (!activeHandle) {
+      const hit = getHitHandle(e.clientX, e.clientY);
+      setHoverHandle(hit);
+      return;
+    }
+    moveDrag(e.clientX, e.clientY);
+  };
+
   const handleMouseUp = () => {
+    setActiveHandle(null);
+    setDragStart(null);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 0 || !canvasRef.current) return;
+    const touch = e.touches[0];
+    const rect = canvasRef.current.getBoundingClientRect();
+    const x = (touch.clientX - rect.left) / renderSize.width;
+    const y = (touch.clientY - rect.top) / renderSize.height;
+    startDrag(touch.clientX, touch.clientY, x, y);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length === 0) return;
+    if (activeHandle) {
+      e.preventDefault();
+    }
+    const touch = e.touches[0];
+    moveDrag(touch.clientX, touch.clientY);
+  };
+
+  const handleTouchEnd = () => {
     setActiveHandle(null);
     setDragStart(null);
   };
@@ -641,7 +670,7 @@ export default function InlineCropper({
   };
 
   return (
-    <div className="flex flex-col border border-stone-200 dark:border-stone-800 rounded-lg overflow-hidden bg-white dark:bg-stone-950 shadow-sm w-full h-full">
+    <div className="flex flex-col border border-stone-200/50 dark:border-stone-800/40 rounded-xl overflow-hidden bg-white/40 dark:bg-stone-950/30 backdrop-blur-sm shadow-xs w-full h-full">
       {/* Interactive Drawing Canvas (Full container width) */}
       <div className="w-full bg-[#141211] dark:bg-[#070605] p-5 flex flex-col justify-center items-center min-h-[360px] lg:min-h-[420px] overflow-hidden select-none relative">
         <div 
@@ -650,7 +679,7 @@ export default function InlineCropper({
         >
           {!isReady && (
             <div className="absolute inset-0 flex flex-col items-center justify-center space-y-3 z-10 bg-[#141211]/90">
-              <div className="w-5 h-5 border-2 border-stone-550 border-t-blue-500 rounded-full animate-spin" />
+              <div className="w-5 h-5 border-2 border-stone-500 border-t-blue-500 rounded-full animate-spin" />
               <span className="font-mono text-[9px] text-stone-500 uppercase tracking-widest">
                 Loading Image...
               </span>
@@ -663,6 +692,9 @@ export default function InlineCropper({
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
             className={`max-w-full max-h-[420px] border border-stone-800 rounded shadow-md touch-none ${currentCursor()}`}
           />
         </div>

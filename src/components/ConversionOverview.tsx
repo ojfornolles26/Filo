@@ -22,7 +22,7 @@ export default function ConversionOverview({
   onReset
 }: ConversionOverviewProps) {
   const [copied, setCopied] = useState(false);
-  const [activeTab, setActiveTab] = useState<'txt' | 'md' | 'meta'>('meta');
+  const [activeTab, setActiveTab] = useState<'txt' | 'md'>(extractedText ? 'txt' : 'md');
   const [isOpenPreview, setIsOpenPreview] = useState(false);
 
   if (!result) return null;
@@ -170,7 +170,7 @@ export default function ConversionOverview({
                     }`}
                   >
                     <FileText className="h-3.5 w-3.5" strokeWidth={1.5} />
-                    <span>Plain Text (Just text)</span>
+                    <span>Plain Text</span>
                   </button>
                 )}
                 {markdownText && (
@@ -184,7 +184,7 @@ export default function ConversionOverview({
                     }`}
                   >
                     <Code className="h-3.5 w-3.5" strokeWidth={1.5} />
-                    <span>Formatted Text (Markdown)</span>
+                    <span>Formatted Text</span>
                   </button>
                 )}
               </div>
@@ -210,7 +210,7 @@ export default function ConversionOverview({
 
             <div className="relative">
               <pre className="p-4 bg-stone-950 text-stone-100 rounded border border-stone-900 overflow-x-auto font-mono text-[11px] leading-relaxed max-h-[300px] overflow-y-auto select-text scrollbar-thin scrollbar-thumb-stone-800">
-                {currentPreviewText || '// Empty element buffer'}
+                {currentPreviewText || 'No text extracted'}
               </pre>
             </div>
 
