@@ -1,0 +1,6 @@
+{
+  "name": "Filo",
+  "description": "A clean, minimalist, and highly professional web tool to convert images to PDFs and cross-convert PDFs back into images, plain text, and markdown files.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
