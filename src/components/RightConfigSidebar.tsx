@@ -294,7 +294,9 @@ export default function RightConfigSidebar({
                         <div className="space-y-1.5 pt-1">
                           <div className="flex justify-between items-center text-xs">
                             <span className="font-sans text-stone-600 dark:text-stone-400 font-semibold text-[10px] uppercase tracking-wider">Image Quality</span>
-                            <span className="font-mono text-stone-800 dark:text-stone-200 font-semibold text-xs">{Math.round(pdfOptions.quality * 100)}%</span>
+                            <span className="font-mono text-stone-800 dark:text-stone-200 font-semibold text-xs">
+                              {pdfOptions.quality === 1 ? '100% (Lossless)' : `${Math.round(pdfOptions.quality * 100)}%`}
+                            </span>
                           </div>
                           <input
                             type="range"
@@ -306,6 +308,11 @@ export default function RightConfigSidebar({
                             disabled={isConverting}
                             className="w-full h-1 accent-stone-900 dark:accent-stone-100 cursor-pointer disabled:opacity-50"
                           />
+                          <p className="font-sans text-[9px] text-stone-400 dark:text-stone-500 leading-normal">
+                            {pdfOptions.quality === 1
+                              ? 'Lossless: WebP/PNG are embedded losslessly, and JPEG original data is preserved without re-compression.'
+                              : 'Compresses images to JPEG format to reduce the compiled PDF file size.'}
+                          </p>
                         </div>
                       </motion.div>
                     )}

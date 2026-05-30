@@ -667,7 +667,7 @@ export default function InlineCropper({
       const updatedFileObject = new File([blob], file.name, { type: file.type });
       const croppedUrl = URL.createObjectURL(blob);
       onSave(updatedFileObject, croppedUrl, blob.size);
-    }, file.type, 0.95);
+    }, file.type, 1.0);
   };
 
   return (

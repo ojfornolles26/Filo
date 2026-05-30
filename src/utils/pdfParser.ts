@@ -7,6 +7,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 import JSZip from 'jszip';
 
 // Vite-specific worker loading using asset url import
+// @ts-ignore
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
 // Set worker path
@@ -139,7 +140,8 @@ export const extractPdfPagesToImages = async (
       };
       
       // Render layout to canvas context
-      await page.render(renderContext).promise;
+      // @ts-ignore
+      await page.render(renderContext as any).promise;
       
       const mimeType = targetFormat === 'png' ? 'image/png' : 'image/jpeg';
       const dataUrl = canvas.toDataURL(mimeType, targetFormat === 'jpeg' ? 0.92 : undefined);

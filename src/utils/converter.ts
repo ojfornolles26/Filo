@@ -32,6 +32,63 @@ const getJsPdfImageFormat = (mimeType: string): string => {
   return 'JPEG'; // Default fallback
 };
 
+const convertToPngDataUrl = (base64Url: string): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.src = base64Url;
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        reject(new Error('Failed to get canvas 2d context for PNG conversion'));
+        return;
+      }
+      ctx.drawImage(img, 0, 0);
+      resolve(canvas.toDataURL('image/png'));
+    };
+    img.onerror = () => reject(new Error('Failed to load image for PNG conversion'));
+  });
+};
+
+const processImageForPdf = async (
+  fileObject: File,
+  mimeType: string,
+  quality: number
+): Promise<{ base64Data: string; format: string }> => {
+  const originalBase64 = await readAsDataURL(fileObject);
+  const format = getJsPdfImageFormat(mimeType);
+
+  if (quality === 1.0) {
+    if (format === 'WEBP') {
+      const pngBase64 = await convertToPngDataUrl(originalBase64);
+      return { base64Data: pngBase64, format: 'PNG' };
+    }
+    return { base64Data: originalBase64, format };
+  }
+
+  // Compress to JPEG for values < 1.0 to reduce PDF size
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.src = originalBase64;
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        reject(new Error('Failed to get canvas context for compression'));
+        return;
+      }
+      ctx.drawImage(img, 0, 0);
+      const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+      resolve({ base64Data: compressedBase64, format: 'JPEG' });
+    };
+    img.onerror = () => reject(new Error('Failed to load image for compression'));
+  });
+};
+
 export const compileImagesToPdf = async (
   files: FiloFile[],
   options: ImageToPdfOptions,
@@ -61,8 +118,12 @@ export const compileImagesToPdf = async (
     );
 
     try {
-      // 1. Read file to Base64
-      const base64Data = await readAsDataURL(filoFile.fileObject);
+      // 1. Process image according to quality (lossless or compressed)
+      const { base64Data, format } = await processImageForPdf(
+        filoFile.fileObject,
+        filoFile.type,
+        options.quality
+      );
       
       // 2. Get image aspect ratio
       const { width: imgW, height: imgH } = await getImageDimensions(base64Data);
@@ -142,7 +203,6 @@ export const compileImagesToPdf = async (
         `Adding page ${fileNum} layout into the PDF...`
       );
 
-      const format = getJsPdfImageFormat(filoFile.type);
       pdf.addImage(
         base64Data,
         format,
