@@ -18,23 +18,23 @@ export default function FaqSection() {
   const faqs: FaqItem[] = [
     {
       question: "How is my privacy protected? Where are my files uploaded?",
-      answer: "Filo operates 100% locally in your browser. All operations—including cropping, rotating, compiling PDF documents, and extracting text layers—are executed using client-side JavaScript on your device. Your files never leave your computer or touch a remote server, ensuring absolute confidentiality."
+      answer: "Your files are never uploaded anywhere! Filo works 100% locally on your own computer or phone. All tools—like cutting, rotating, grouping pictures into PDFs, and pulling out text—happen entirely inside your web browser. Your documents never touch the internet or any external servers, meaning your data stays completely private and secure."
     },
     {
       question: "What file formats are supported?",
-      answer: "For compiling PDFs, we support PNG, JPG, JPEG, and WebP images. For text extraction, you can load any standard PDF document to pull out clean Plain Text (.txt) or formatted Markdown (.md) notes."
+      answer: "You can add standard image types like PNG, JPG, JPEG, and WebP to turn them into PDFs. To extract text, you can upload standard PDF documents to download them as Plain Text (.txt) files or formatted Markdown (.md) notes (which are great for note-taking apps like Notion or Obsidian)."
     },
     {
       question: "Is there a file size or page limit?",
-      answer: "Since all conversions run locally on your device, there are no artificial file size, page count, or upload speed limits imposed by us. The processing speed is entirely determined by your browser's capability and device memory."
+      answer: "No! Since Filo runs on your own device instead of our servers, we don't have any upload speed limits or file size caps. You can convert files as large as your browser can handle. The speed depends entirely on how fast your device is."
     },
     {
       question: "How does the 'Fit Photo' layout format work?",
-      answer: "By default, the converter is set to A4 with 0 margins, but you can also choose 'Fit Photo' page size. This option dynamically adjusts each PDF page's dimensions to fit the original aspect ratio of your image exactly. This prevents cropping, stretching, or adding unexpected white borders to your files."
+      answer: "Normally, files are sized to standard document paper (like A4). If you select 'Fit Photo' page size, the PDF pages will automatically adjust to match the exact shape (proportions) of your images. This ensures your pictures don't get cut off, stretched, or given unexpected white borders."
     },
     {
       question: "Can I extract text from scanned PDFs?",
-      answer: "Filo extracts structured text layers directly from the document layer of PDFs. If a PDF is a scan (consisting entirely of photos without underlying text), you can convert it to images, but direct text extraction will be empty as OCR (Optical Character Recognition) is not running client-side."
+      answer: "It depends. Filo can extract text if it is selectable (meaning you can highlight it with your cursor). If the PDF is a scan (a picture of text taken with a scanner or phone camera), it doesn't contain actual text data yet. In this case, direct text extraction will be blank, because Filo runs fully offline and does not include OCR (Optical Character Recognition—the technology that reads text inside photos)."
     }
   ];
 

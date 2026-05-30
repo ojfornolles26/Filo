@@ -24,7 +24,7 @@ import FaqSection from './components/FaqSection';
 import LegalModal from './components/LegalModal';
 
 import { compileImagesToPdf } from './utils/converter';
-import { parsePdfClientSide, synthesizeTxtFile, synthesizeMarkdownFile } from './utils/pdfParser';
+import { parsePdfClientSide, extractPdfPagesToImages, synthesizeTxtFile, synthesizeMarkdownFile } from './utils/pdfParser';
 
 const getMimeFromExtension = (filename: string): string => {
   const ext = filename.split('.').pop()?.toLowerCase();
@@ -361,6 +361,15 @@ export default function App() {
     setMarkdownText(undefined);
   };
 
+  const readFileAsArrayBuffer = (file: File): Promise<ArrayBuffer> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as ArrayBuffer);
+      reader.onerror = () => reject(new Error('Failed to read PDF file binary contents.'));
+      reader.readAsArrayBuffer(file);
+    });
+  };
+
   // Compile Trigger
   const handleConvert = async () => {
     if (files.length === 0) return;
@@ -392,7 +401,10 @@ export default function App() {
         const targetPdf = (activeCropFile && activeCropFile.type === 'application/pdf') ? activeCropFile : files.find(f => f.type === 'application/pdf');
         if (!targetPdf) throw new Error('No PDF file queued. Please select or drag/drop a PDF.');
 
-        const parsed = await parsePdfClientSide(targetPdf.fileObject, (pct, msg) => {
+        setConversionStep('Reading PDF document...');
+        const arrayBuffer = await readFileAsArrayBuffer(targetPdf.fileObject);
+
+        const parsed = await parsePdfClientSide(arrayBuffer, targetPdf.name, (pct, msg) => {
           setConversionProgress(pct);
           setConversionStep(msg);
         });
@@ -426,39 +438,27 @@ export default function App() {
           });
           
         } else {
-          // Extraction to Images ZIP placeholder
-          // Generate a highly structured layout log package as textual summary
-          setConversionStep('Preparing your images...');
-          const totalPages = parsed.pageCount;
-          let mockZipContent = `==================================================\n`;
-          mockZipContent += `CONVERTED IMAGES FROM PDF\n`;
-          mockZipContent += `Source PDF: ${parsed.title || 'Untitled Document'}\n`;
-          mockZipContent += `Format Target: ${formatOptions.targetFormat.toUpperCase()} Images\n`;
-          mockZipContent += `Resolution Sharpness: ${formatOptions.resolutionScale === 1 ? 'Compact' : formatOptions.resolutionScale === 2 ? 'High Quality' : 'Super Sharp'} (${formatOptions.resolutionScale}x)\n`;
-          mockZipContent += `Extracted Pages (Images): ${totalPages}\n`;
-          mockZipContent += `==================================================\n\n`;
+          setConversionStep('Rendering PDF pages...');
+          const { blob, fileName } = await extractPdfPagesToImages(
+            arrayBuffer,
+            formatOptions.targetFormat,
+            formatOptions.resolutionScale,
+            (pct, msg) => {
+              setConversionProgress(pct);
+              setConversionStep(msg);
+            }
+          );
 
-          parsed.textByPage.forEach((pageText, idx) => {
-            mockZipContent += `--- PAGE IMAGE ${idx + 1} DIRECTORY ---\n`;
-            mockZipContent += `Image File Name: page_${idx + 1}.${formatOptions.targetFormat}\n`;
-            mockZipContent += `Image Quality: ${formatOptions.resolutionScale === 1 ? '72 (Compact)' : formatOptions.resolutionScale === 2 ? '150 (High Quality)' : '300 (Super Sharp)'} DPI\n`;
-            mockZipContent += `Extracted Text Preview:\n`;
-            mockZipContent += pageText.trim() ? `  "${pageText.slice(0, 150).replace(/\n/g, ' ')}..."` : `  [Pictures and Graphics only]`;
-            mockZipContent += `\n\n`;
-          });
-
-          const blob = new Blob([mockZipContent], { type: 'text/plain;charset=utf-8' });
           const blobUrl = URL.createObjectURL(blob);
-
-          setExtractedText(mockZipContent);
+          setExtractedText(`Successfully converted PDF to images!\n\nExtracted: ${parsed.pageCount} pages\nFile size: ${(blob.size / 1024 / 1024).toFixed(2)} MB\nArchive: ${fileName}`);
           setMarkdownText(undefined);
 
           setResult({
-            fileName: `${targetPdf.name.replace(/\.pdf$/gi, '')}_images_${formatOptions.targetFormat}_bundle.txt`,
+            fileName: `${targetPdf.name.replace(/\.pdf$/gi, '')}_images_${formatOptions.targetFormat}.zip`,
             fileSize: blob.size,
             url: blobUrl,
-            downloadName: `${targetPdf.name.replace(/\.pdf$/gi, '')}_images_${formatOptions.targetFormat}_bundle.txt`,
-            type: 'application/octet-stream',
+            downloadName: `${targetPdf.name.replace(/\.pdf$/gi, '')}_images_${formatOptions.targetFormat}.zip`,
+            type: 'application/zip',
             originalFileNames: [targetPdf.name]
           });
         }

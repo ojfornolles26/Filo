@@ -3,6 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import * as pdfjsLib from 'pdfjs-dist';
+import JSZip from 'jszip';
+
+// Vite-specific worker loading using asset url import
+import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+
+// Set worker path
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+
 export interface ParsedPdfResult {
   pageCount: number;
   title: string | null;
@@ -15,169 +24,144 @@ export interface ParsedPdfResult {
 }
 
 /**
- * Clean and parse PDF string nodes
+ * Standard PDF text and metadata extractor
  */
-function cleanPdfString(raw: string): string {
-  // Replace octal escapes (\377, etc) or common hex codes
-  let cleaned = raw
-    .replace(/\\r/g, '\n')
-    .replace(/\\n/g, '\n')
-    .replace(/\\t/g, '\t')
-    .replace(/\\b/g, '')
-    .replace(/\\f/g, '')
-    .replace(/\\\(/g, '(')
-    .replace(/\\\)/g, ')')
-    .replace(/\\\\/g, '\\');
-
-  // Handle PDF hex representation e.g. <414243> = ABC
-  if (cleaned.startsWith('<') && cleaned.endsWith('>')) {
-    const hex = cleaned.slice(1, -1);
-    try {
-      let str = '';
-      for (let i = 0; i < hex.length; i += 2) {
-        str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
-      }
-      return str;
-    } catch {
-      return cleaned;
-    }
-  }
-
-  return cleaned;
-}
-
 export const parsePdfClientSide = async (
-  file: File,
+  fileData: ArrayBuffer,
+  fileName: string,
   onProgress: (percent: number, stepLabel: string) => void
 ): Promise<ParsedPdfResult> => {
-  onProgress(10, 'Looking at document layout...');
+  onProgress(10, 'Opening PDF document...');
   
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = async () => {
-      try {
-        const text = reader.result as string;
-        
-        onProgress(30, 'Counting pages and design elements...');
-        // 1. Pages detection
-        // Standard PDFs store pages in trees with `/Count [num]` or `/Type /Pages`
-        let pageCount = 0;
-        
-        // Count instances of /Type /Page (excluding /Pages) or look for /Count
-        const countRegex = /\/Count\s+(\d+)/g;
-        let match;
-        let maxCount = 0;
-        while ((match = countRegex.exec(text)) !== null) {
-          const countVal = parseInt(match[1], 10);
-          if (countVal > maxCount) {
-            maxCount = countVal;
-          }
-        }
-        
-        const pageInstances = (text.match(/\/Type\s*\/Page\b/g) || []).length;
-        pageCount = maxCount > 0 ? maxCount : (pageInstances > 0 ? pageInstances : 1);
+  try {
+    const loadingTask = pdfjsLib.getDocument({
+      data: fileData,
+      useSystemFonts: true
+    });
 
-        onProgress(50, 'Finding document title and author info...');
-        // 2. Extract Document Metadata
-        const titleMatch = text.match(/\/Title\s*(?:\(([^)]+)\)|<([^>]+)>)/);
-        const authorMatch = text.match(/\/Author\s*(?:\(([^)]+)\)|<([^>]+)>)/);
-        const creatorMatch = text.match(/\/Creator\s*(?:\(([^)]+)\)|<([^>]+)>)/);
-
-        const title = titleMatch ? cleanPdfString(titleMatch[1] || titleMatch[2]) : null;
-        const author = authorMatch ? cleanPdfString(authorMatch[1] || authorMatch[2]) : null;
-        const creator = creatorMatch ? cleanPdfString(creatorMatch[1] || creatorMatch[2]) : null;
-
-        onProgress(70, 'Reading written text from pages...');
-
-        // 3. Extract text content
-        // Standard searchable PDFs hold strings inside streams like `/BT` (begin text) and `ET` (end text)
-        // Inside them, text is shown in parentheses e.g. `(Hello World) Tj` or `[(Hel) 5 (lo)] TJ`
-        const textByPage: string[] = [];
-        
-        // Find streams
-        const streamRegex = /stream[\r\n]+([\s\S]*?)endstream/g;
-        let textFound = '';
-        let streamCount = 0;
-        
-        while ((match = streamRegex.exec(text)) !== null && streamCount < 200) {
-          streamCount++;
-          const streamContent = match[1];
-          
-          // Look for Begin Text / End Text tags
-          const textBlocks = streamContent.match(/\/BT[\s\S]*?ET/g);
-          if (textBlocks) {
-            for (const block of textBlocks) {
-              // Capture anything between parenthetical text arrays [(...) Tj] or absolute (Tj) bounds
-              const parentheticalMatches = block.match(/\(([^)]*)\)/g);
-              if (parentheticalMatches) {
-                const blockText = parentheticalMatches
-                  .map(pm => pm.slice(1, -1)) // strip parentheses
-                  .map(cleanPdfString)
-                  .join(' ');
-                textFound += blockText + '\n';
-              }
-            }
-          }
-        }
-
-        onProgress(90, 'Combining text pages into a clean document...');
-
-        // Build elegant list representing pages
-        if (textFound.trim().length > 0) {
-          // Splitting text found across approximate page counts
-          const lines = textFound.split('\n').filter(l => l.trim().length > 0);
-          const linesPerPage = Math.max(5, Math.ceil(lines.length / pageCount));
-          
-          for (let p = 0; p < pageCount; p++) {
-            const pageLines = lines.slice(p * linesPerPage, (p + 1) * linesPerPage);
-            textByPage.push(pageLines.join('\n'));
-          }
-        } else {
-          // Try a simple search for regular plaintext parenthesis brackets if BT/ET wasn't structured properly
-          const simpleTextMatches = text.match(/\(([^)]+)\)\s*(?:Tj|TJ)/g);
-          if (simpleTextMatches && simpleTextMatches.length > 0) {
-            const lines = simpleTextMatches
-              .map(m => {
-                const inner = m.match(/\(([^)]+)\)/);
-                return inner ? cleanPdfString(inner[1]) : '';
-              })
-              .filter(l => l.trim().length > 0);
-
-            const linesPerPage = Math.max(5, Math.ceil(lines.length / pageCount));
-            for (let p = 0; p < pageCount; p++) {
-              const pageLines = lines.slice(p * linesPerPage, (p + 1) * linesPerPage);
-              textByPage.push(pageLines.join('\n'));
-            }
-          }
-        }
-
-        // Fill remaining pages if empty
-        while (textByPage.length < pageCount) {
-          textByPage.push('');
-        }
-
-        const allText = textByPage.join('\n\n');
-        const isScannedOrGraphicsOnly = allText.trim().length < 20;
-
-        onProgress(100, 'Finished!');
-
-        resolve({
-          pageCount,
-          title: title || file.name.replace(/\.pdf$/gi, ''),
-          author: author || 'Unknown author',
-          creator: creator || 'Unknown system',
-          textByPage,
-          allText: isScannedOrGraphicsOnly ? '' : allText,
-          isScannedOrGraphicsOnly,
-          fileSize: file.size
-        });
-      } catch (err) {
-        reject(err);
+    loadingTask.onProgress = (progressData) => {
+      if (progressData && progressData.total > 0) {
+        const percent = Math.floor((progressData.loaded / progressData.total) * 20) + 10;
+        onProgress(percent, 'Retrieving layout structures...');
       }
     };
-    reader.onerror = () => reject(new Error('Failed to read binary PDF content.'));
-    reader.readAsText(file); // This accesses literal text commands in PDF streams
-  });
+
+    const pdfDoc = await loadingTask.promise;
+    const pageCount = pdfDoc.numPages;
+
+    onProgress(35, 'Extracting metadata details...');
+    const metadata = await pdfDoc.getMetadata();
+    const info = metadata?.info as any;
+    const title = info?.Title || null;
+    const author = info?.Author || null;
+    const creator = info?.Creator || null;
+
+    const textByPage: string[] = [];
+    
+    for (let i = 1; i <= pageCount; i++) {
+      const percent = Math.floor(40 + (i / pageCount) * 55);
+      onProgress(percent, `Reading page ${i} of ${pageCount}...`);
+      
+      const page = await pdfDoc.getPage(i);
+      const textContent = await page.getTextContent();
+      
+      // Map text items to string segments
+      const pageText = textContent.items
+        .map((item: any) => item.str)
+        .join(' ');
+      
+      textByPage.push(pageText);
+    }
+
+    const allText = textByPage.join('\n\n');
+    const isScannedOrGraphicsOnly = allText.trim().length < 20;
+
+    onProgress(100, 'Parsing complete');
+
+    return {
+      pageCount,
+      title: title || fileName.replace(/\.pdf$/gi, ''),
+      author: author || 'Unknown author',
+      creator: creator || 'Unknown system',
+      textByPage,
+      allText: isScannedOrGraphicsOnly ? '' : allText,
+      isScannedOrGraphicsOnly,
+      fileSize: fileData.byteLength
+    };
+  } catch (err: any) {
+    console.error('PDF.js client extraction failed:', err);
+    throw new Error(err.message || 'Standard parser failed to read PDF contents. The file may be password-protected or corrupted.');
+  }
+};
+
+/**
+ * Render PDF pages onto canvas and bundle them into a ZIP archive
+ */
+export const extractPdfPagesToImages = async (
+  fileData: ArrayBuffer,
+  targetFormat: 'png' | 'jpeg',
+  resolutionScale: number,
+  onProgress: (percent: number, stepLabel: string) => void
+): Promise<{ blob: Blob; fileName: string }> => {
+  onProgress(10, 'Initializing page drawing engine...');
+  
+  try {
+    const loadingTask = pdfjsLib.getDocument({
+      data: fileData,
+      useSystemFonts: true
+    });
+
+    const pdfDoc = await loadingTask.promise;
+    const pageCount = pdfDoc.numPages;
+    const zip = new JSZip();
+    
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    
+    if (!context) {
+      throw new Error('Canvas 2D context creation failed.');
+    }
+
+    for (let i = 1; i <= pageCount; i++) {
+      const renderPercent = Math.floor(15 + (i / pageCount) * 75);
+      onProgress(renderPercent, `Rendering page ${i} of ${pageCount} to canvas...`);
+      
+      const page = await pdfDoc.getPage(i);
+      
+      // Calculate viewport dimensions according to resolution scale (e.g. 1x, 2x, 3x)
+      const viewport = page.getViewport({ scale: resolutionScale });
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      
+      const renderContext = {
+        canvasContext: context,
+        viewport: viewport
+      };
+      
+      // Render layout to canvas context
+      await page.render(renderContext).promise;
+      
+      const mimeType = targetFormat === 'png' ? 'image/png' : 'image/jpeg';
+      const dataUrl = canvas.toDataURL(mimeType, targetFormat === 'jpeg' ? 0.92 : undefined);
+      const base64Data = dataUrl.split(',')[1];
+      
+      // Add image file to the ZIP folder
+      zip.file(`page_${i.toString().padStart(3, '0')}.${targetFormat}`, base64Data, { base64: true });
+    }
+
+    onProgress(92, 'Generating ZIP archive in memory...');
+    const blob = await zip.generateAsync({ type: 'blob' });
+    
+    onProgress(100, 'Archive built successfully');
+    
+    return {
+      blob,
+      fileName: `pages_${targetFormat}_bundle.zip`
+    };
+  } catch (err: any) {
+    console.error('Canvas page extraction failed:', err);
+    throw new Error(err.message || 'Image rendering engine failed to compile PDF pages.');
+  }
 };
 
 /**
