@@ -133,16 +133,17 @@ export default function InlineCropper({
     }
   };
 
-  const applyAspectRatio = (type: 'free' | 'original' | '1:1' | '4:3') => {
-    setAspectRatioType(type);
-    if (type === 'free') return;
+  // Snaps the crop box boundaries immediately when the aspect ratio preset changes in the sidebar
+  useEffect(() => {
+    if (!isReady || !image) return;
+    if (aspectRatioType === 'free') return;
 
     let ratio = 1.0;
-    if (type === 'original') {
+    if (aspectRatioType === 'original') {
       ratio = naturalSize.width / naturalSize.height;
-    } else if (type === '1:1') {
+    } else if (aspectRatioType === '1:1') {
       ratio = 1.0;
-    } else if (type === '4:3') {
+    } else if (aspectRatioType === '4:3') {
       ratio = 4 / 3;
     }
 
@@ -173,7 +174,7 @@ export default function InlineCropper({
       w,
       h
     });
-  };
+  }, [aspectRatioType, isReady, renderSize.width, renderSize.height, naturalSize, image]);
 
   // Canvas Drawing Sequence
   useEffect(() => {
@@ -672,7 +673,7 @@ export default function InlineCropper({
   return (
     <div className="flex flex-col border border-stone-200/50 dark:border-stone-800/40 rounded-xl overflow-hidden bg-white/40 dark:bg-stone-950/30 backdrop-blur-sm shadow-xs w-full h-full">
       {/* Interactive Drawing Canvas (Full container width) */}
-      <div className="w-full bg-[#141211] dark:bg-[#070605] p-5 flex flex-col justify-center items-center min-h-[360px] lg:min-h-[420px] overflow-hidden select-none relative">
+      <div className="w-full bg-[#141211] dark:bg-[#070605] p-5 flex flex-col justify-center items-center min-h-[220px] lg:min-h-[420px] overflow-hidden select-none relative">
         <div 
           ref={containerRef}
           className="w-full h-full flex items-center justify-center relative max-h-[420px]"

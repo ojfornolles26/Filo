@@ -4,7 +4,7 @@
  */
 
 import { useState } from 'react';
-import { Download, CheckCircle, Copy, Check, RefreshCw, Eye, EyeOff, FileText, Code } from 'lucide-react';
+import { Download, CheckCircle, Copy, Check, RefreshCw, Eye, EyeOff, FileText, Code, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ConversionResult } from '../types';
 
@@ -13,13 +13,15 @@ interface ConversionOverviewProps {
   extractedText?: string;
   markdownText?: string;
   onReset: () => void;
+  onClose?: () => void;
 }
 
 export default function ConversionOverview({
   result,
   extractedText,
   markdownText,
-  onReset
+  onReset,
+  onClose
 }: ConversionOverviewProps) {
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState<'txt' | 'md'>(extractedText ? 'txt' : 'md');
@@ -59,7 +61,7 @@ export default function ConversionOverview({
       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
       className="border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 p-6 rounded-lg space-y-6"
     >
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center space-x-3">
           <div className="p-2 rounded-full bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/40">
             <CheckCircle className="h-5 w-5" strokeWidth={1.5} />
@@ -74,19 +76,31 @@ export default function ConversionOverview({
           </div>
         </div>
 
-        <button
-          onClick={onReset}
-          className="flex items-center space-x-1 px-3 py-1.5 rounded border border-stone-200 dark:border-stone-800 hover:border-stone-400 dark:hover:border-stone-600 bg-transparent text-xs text-stone-700 dark:text-stone-300 font-medium cursor-pointer transition-colors focus:outline-none"
-        >
-          <RefreshCw className="h-3 w-3" />
-          <span>Convert more files</span>
-        </button>
+        <div className="flex items-center space-x-2 w-full sm:w-auto justify-between sm:justify-end">
+          <button
+            onClick={onReset}
+            className="flex-grow sm:flex-grow-0 flex items-center justify-center space-x-1.5 px-3 py-1.5 rounded border border-stone-200 dark:border-stone-800 hover:border-stone-400 dark:hover:border-stone-600 bg-transparent text-xs text-stone-700 dark:text-stone-300 font-medium cursor-pointer transition-colors focus:outline-none"
+          >
+            <RefreshCw className="h-3 w-3" />
+            <span>Convert more files</span>
+          </button>
+          
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="p-1.5 rounded border border-stone-200 dark:border-stone-800 hover:bg-stone-50 dark:hover:bg-stone-900 text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200 transition-colors cursor-pointer focus:outline-none flex items-center justify-center bg-transparent shrink-0"
+              title="Close and keep files in workspace"
+            >
+              <X className="h-4 w-4" strokeWidth={1.8} />
+            </button>
+          )}
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-stone-100 dark:border-stone-900 pt-5">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-stone-100 dark:border-stone-800 pt-5">
         
         {/* Output Document Card */}
-        <div className="md:col-span-2 border border-stone-200 dark:border-stone-800 rounded p-4 flex flex-col justify-between space-y-4">
+        <div className="sm:col-span-2 border border-stone-200 dark:border-stone-800 rounded p-4 flex flex-col justify-between space-y-4">
           <div className="space-y-1">
             <span className="font-mono text-[9px] uppercase tracking-widest text-stone-400 dark:text-stone-500 font-bold block">
               YOUR DOWNLOADABLE FILE
@@ -157,7 +171,7 @@ export default function ConversionOverview({
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
             className="overflow-hidden border border-stone-200 dark:border-stone-800 rounded bg-stone-50/20 dark:bg-stone-950/40 p-4 space-y-4"
           >
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-stone-100 dark:border-stone-950 pb-3 gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-stone-100 dark:border-stone-800 pb-3 gap-2">
               <div className="flex items-center space-x-1 bg-stone-100 dark:bg-stone-900 p-0.5 rounded border border-stone-200/30 dark:border-stone-800/60 max-w-fit">
                 {extractedText && (
                   <button

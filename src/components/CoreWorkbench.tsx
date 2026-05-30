@@ -5,7 +5,7 @@
 
 import React, { useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { FileUp, FileText, ArrowLeft, Layout, CheckCircle2 } from 'lucide-react';
+import { FileUp, FileText, ArrowLeft, Layout, CheckCircle2, Crop, FlipHorizontal, FlipVertical, Grid, RefreshCw, Check } from 'lucide-react';
 import { FiloFile, ConversionMode } from '../types';
 import InlineCropper from './InlineCropper';
 
@@ -28,6 +28,9 @@ interface CoreWorkbenchProps {
   setShowGrid: (val: boolean) => void;
   onRegisterActions: (actions: { reset: () => void; save: () => void } | null) => void;
   onExitWorkspace: () => void; // New prop for integrated navigation
+  isCropping: boolean;
+  setIsCropping?: (val: boolean) => void;
+  onCropSaveGlobal?: () => void;
 }
 
 export default function CoreWorkbench({
@@ -47,7 +50,10 @@ export default function CoreWorkbench({
   showGrid,
   setShowGrid,
   onRegisterActions,
-  onExitWorkspace
+  onExitWorkspace,
+  isCropping,
+  setIsCropping,
+  onCropSaveGlobal
 }: CoreWorkbenchProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -111,7 +117,7 @@ export default function CoreWorkbench({
       />
 
       {/* Main Sandbox Canvas Card */}
-      <div className="flex-grow flex flex-col bg-white/70 dark:bg-stone-950/60 backdrop-blur-md border border-stone-200/50 dark:border-stone-800/40 rounded-xl p-5 shadow-xs h-full min-h-[400px] justify-between relative overflow-hidden transition-all duration-300 hover:shadow-sm">
+      <div className="flex-grow flex flex-col bg-white/70 dark:bg-stone-950/60 backdrop-blur-md border border-stone-200/50 dark:border-stone-800/40 rounded-xl p-4 sm:p-5 shadow-xs h-full lg:min-h-[400px] min-h-0 justify-between relative overflow-hidden transition-all duration-300 hover:shadow-sm">
         
         {files.length === 0 ? (
           
@@ -123,7 +129,7 @@ export default function CoreWorkbench({
             onDragLeave={handleDrag}
             onDrop={handleDrop}
             onClick={triggerBrowse}
-            className={`w-full h-full min-h-[380px] border border-dashed rounded-xl cursor-pointer flex flex-col items-center justify-center p-8 text-center transition-all select-none ${
+            className={`w-full h-full lg:min-h-[380px] min-h-[250px] border border-dashed rounded-xl cursor-pointer flex flex-col items-center justify-center p-6 sm:p-8 text-center transition-all select-none ${
               isDragOver
                 ? 'border-blue-500 bg-stone-100 dark:bg-stone-900/40'
                 : 'border-stone-200/60 hover:border-stone-400 dark:border-stone-800/50 dark:hover:border-stone-700 bg-stone-50/10 dark:bg-stone-900/15'
@@ -161,8 +167,8 @@ export default function CoreWorkbench({
           /* ACTIVE CANVAS STATE */
           <div className="w-full h-full flex flex-col space-y-4 justify-between flex-1 min-h-0">
             
-            {/* Integrated Header Row */}
-            <div className="flex items-center justify-between pb-2 border-b border-stone-100/60 dark:border-stone-900/40 shrink-0">
+            {/* Integrated Header Row - desktop only since mobile has global header */}
+            <div className="hidden lg:flex items-center justify-between pb-2 border-b border-stone-100/60 dark:border-stone-800/40 shrink-0">
               <div className="flex items-center space-x-3.5">
                 <button
                   type="button"
@@ -196,19 +202,182 @@ export default function CoreWorkbench({
                     className="h-full flex flex-col justify-center"
                   >
                     {activeCropFile && activeCropFile.previewUrl ? (
-                      <InlineCropper 
-                        file={activeCropFile} 
-                        onSave={onSaveCrop}
-                        aspectRatioType={aspectRatioType}
-                        setAspectRatioType={setAspectRatioType}
-                        flipH={flipH}
-                        setFlipH={setFlipH}
-                        flipV={flipV}
-                        setFlipV={setFlipV}
-                        showGrid={showGrid}
-                        setShowGrid={setShowGrid}
-                        onRegisterActions={onRegisterActions}
-                      />
+                      <AnimatePresence mode="wait" initial={false}>
+                        {isCropping ? (
+                          <motion.div
+                            key="cropper-canvas"
+                            initial={{ opacity: 0, scale: 0.99 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.99 }}
+                            transition={{ duration: 0.15, ease: 'easeInOut' }}
+                            className="h-full flex flex-col justify-between"
+                          >
+                            <div className="flex-1 min-h-0">
+                              <InlineCropper 
+                                file={activeCropFile} 
+                                onSave={onSaveCrop}
+                                aspectRatioType={aspectRatioType}
+                                setAspectRatioType={setAspectRatioType}
+                                flipH={flipH}
+                                setFlipH={setFlipH}
+                                flipV={flipV}
+                                setFlipV={setFlipV}
+                                showGrid={showGrid}
+                                setShowGrid={setShowGrid}
+                                onRegisterActions={onRegisterActions}
+                              />
+                            </div>
+
+                            {/* Mobile Crop Controls Bottom Bar */}
+                            <div className="lg:hidden mt-3 space-y-3 border-t border-stone-200/50 dark:border-stone-800/40 pt-3 shrink-0">
+                              <div className="space-y-1">
+                                <span className="block font-sans text-[9px] text-stone-400 dark:text-stone-500 font-semibold uppercase tracking-wider">
+                                  Aspect Ratio
+                                </span>
+                                <div className="grid grid-cols-4 gap-1.5">
+                                  {[
+                                    { id: 'free', label: 'Free' },
+                                    { id: 'original', label: 'Original' },
+                                    { id: '1:1', label: '1:1' },
+                                    { id: '4:3', label: '4:3' }
+                                  ].map((preset) => (
+                                    <button
+                                      key={preset.id}
+                                      type="button"
+                                      onClick={() => setAspectRatioType(preset.id as any)}
+                                      className={`py-1 text-[10px] rounded border cursor-pointer font-bold transition-colors focus:outline-none text-center ${
+                                        aspectRatioType === preset.id
+                                          ? 'bg-blue-600/10 border-blue-500 text-blue-600 dark:bg-blue-500/10 dark:border-blue-400 dark:text-blue-400 shadow-xs'
+                                          : 'bg-white border-stone-200 text-stone-600 hover:border-stone-400 dark:bg-stone-900 dark:border-stone-800 dark:text-stone-400 dark:hover:border-stone-700'
+                                      }`}
+                                    >
+                                      {preset.label}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+
+                              <div className="flex gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => setFlipH(!flipH)}
+                                  className={`flex-1 py-1.5 text-[9px] rounded border flex items-center justify-center gap-1 cursor-pointer focus:outline-none transition-colors font-bold ${
+                                    flipH 
+                                      ? 'bg-blue-600/10 border-blue-500 text-blue-600 dark:bg-blue-500/10 dark:border-blue-400 dark:text-blue-400 shadow-xs'
+                                      : 'bg-white border-stone-200 text-stone-600 hover:border-stone-400 dark:bg-stone-900 dark:border-stone-800 dark:text-stone-400'
+                                  }`}
+                                  title="Flip Horizontally"
+                                >
+                                  <FlipHorizontal className="h-3 w-3" />
+                                  <span>Flip H</span>
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => setFlipV(!flipV)}
+                                  className={`flex-1 py-1.5 text-[9px] rounded border flex items-center justify-center gap-1 cursor-pointer focus:outline-none transition-colors font-bold ${
+                                    flipV 
+                                      ? 'bg-blue-600/10 border-blue-500 text-blue-600 dark:bg-blue-500/10 dark:border-blue-400 dark:text-blue-400 shadow-xs'
+                                      : 'bg-white border-stone-200 text-stone-600 hover:border-stone-400 dark:bg-stone-900 dark:border-stone-800 dark:text-stone-400'
+                                  }`}
+                                  title="Flip Vertically"
+                                >
+                                  <FlipVertical className="h-3 w-3" />
+                                  <span>Flip V</span>
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => setShowGrid(!showGrid)}
+                                  className={`flex-1 py-1.5 text-[9px] rounded border flex items-center justify-center gap-1 cursor-pointer focus:outline-none transition-colors font-bold ${
+                                    showGrid 
+                                      ? 'bg-blue-600/10 border-blue-500 text-blue-600 dark:bg-blue-500/10 dark:border-blue-400 dark:text-blue-400 shadow-xs'
+                                      : 'bg-white border-stone-200 text-stone-600 hover:border-stone-400 dark:bg-stone-900 dark:border-stone-800 dark:text-stone-400'
+                                  }`}
+                                  title="Toggle Grid Lines"
+                                >
+                                  <Grid className="h-3.5 w-3.5" />
+                                  <span>Grid</span>
+                                </button>
+                              </div>
+
+                              <div className="flex gap-2 pt-1">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setAspectRatioType('free');
+                                    setFlipH(false);
+                                    setFlipV(false);
+                                  }}
+                                  className="flex-1 py-1.5 text-[10px] rounded border border-stone-200 dark:border-stone-800 bg-white hover:bg-stone-50 dark:bg-stone-950 dark:hover:bg-stone-900 text-stone-600 dark:text-stone-400 font-bold flex items-center justify-center gap-1 cursor-pointer focus:outline-none transition-colors"
+                                >
+                                  <RefreshCw className="h-3 w-3" />
+                                  <span>Reset</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setIsCropping?.(false)}
+                                  className="flex-1 py-1.5 text-[10px] rounded border border-stone-200 dark:border-stone-800 bg-white hover:bg-stone-50 dark:bg-stone-950 dark:hover:bg-stone-900 text-stone-600 dark:text-stone-400 font-bold flex items-center justify-center gap-1 cursor-pointer focus:outline-none transition-colors"
+                                >
+                                  <span>Cancel</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={onCropSaveGlobal}
+                                  className="flex-1 py-1.5 text-[10px] rounded bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-400 text-white font-bold flex items-center justify-center gap-1 border border-blue-600 dark:border-blue-500 cursor-pointer focus:outline-none transition-colors shadow-xs"
+                                >
+                                  <Check className="h-3.5 w-3.5 stroke-[2.5]" />
+                                  <span>Apply</span>
+                                </button>
+                              </div>
+                            </div>
+                          </motion.div>
+                        ) : (
+                          <motion.div
+                            key="clean-preview"
+                            initial={{ opacity: 0, scale: 0.99 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.99 }}
+                            transition={{ duration: 0.15, ease: 'easeInOut' }}
+                            className="flex-1 flex flex-col justify-between h-full min-h-0"
+                          >
+                            <div className="flex-1 flex items-center justify-center p-2 min-h-0">
+                              <img
+                                src={activeCropFile.previewUrl}
+                                alt={activeCropFile.name}
+                                className="object-contain max-h-[220px] sm:max-h-[300px] lg:max-h-[380px] rounded-lg shadow-sm border border-stone-200/50 dark:border-stone-800/40 bg-stone-100/10 dark:bg-stone-900/10"
+                              />
+                            </div>
+
+                            {/* Mobile Only: Selected Specs & Crop Trigger */}
+                            <div className="lg:hidden mt-3 space-y-3 shrink-0">
+                              <div className="p-3 border border-stone-200/50 dark:border-stone-800/40 bg-stone-50/15 dark:bg-stone-950/20 rounded-xl space-y-2">
+                                <span className="font-sans text-[9px] font-semibold text-blue-600 dark:text-blue-400 block uppercase tracking-wider">
+                                  Selected Image Details
+                                </span>
+                                <div className="grid grid-cols-3 gap-2 text-xs">
+                                  <div className="col-span-2 truncate">
+                                    <span className="text-stone-400 dark:text-stone-500 block text-[9px] uppercase">Filename</span>
+                                    <span className="font-semibold text-stone-700 dark:text-stone-300 truncate block">{activeCropFile.name}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-stone-400 dark:text-stone-500 block text-[9px] uppercase">Size</span>
+                                    <span className="font-semibold text-stone-700 dark:text-stone-300 block">{formatSize(activeCropFile.size)}</span>
+                                  </div>
+                                </div>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => setIsCropping?.(true)}
+                                className="w-full py-2 px-4 text-xs rounded-lg bg-stone-900 hover:bg-stone-800 dark:bg-stone-100 dark:hover:bg-white text-white dark:text-stone-900 font-semibold flex items-center justify-center gap-2 border border-stone-900 dark:border-stone-100 cursor-pointer focus:outline-none transition-all shadow-xs"
+                              >
+                                <Crop className="h-4 w-4" />
+                                <span>Crop & Rotate Image</span>
+                              </button>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     ) : (
                       <div className="h-72 border border-stone-200/50 dark:border-stone-800/40 bg-stone-50/20 rounded-xl flex items-center justify-center p-4">
                         <div className="flex flex-col items-center space-y-2">
@@ -229,8 +398,8 @@ export default function CoreWorkbench({
                     className="space-y-6 py-2 flex flex-col h-full justify-center"
                   >
                     {/* Status Visualizer */}
-                    <div className="border border-stone-200/50 dark:border-stone-900/40 bg-stone-50/15 dark:bg-stone-950/20 rounded-xl p-8 flex flex-col items-center justify-center text-center space-y-5">
-                      <div className="relative w-24 h-32 bg-white dark:bg-stone-900 border border-stone-200/50 dark:border-stone-800/40 rounded-xl shadow-xs flex flex-col p-2.5 justify-between">
+                    <div className="border border-stone-200/50 dark:border-stone-800/40 bg-stone-50/15 dark:bg-stone-950/20 rounded-xl p-6 sm:p-8 flex flex-col items-center justify-center text-center space-y-4 sm:space-y-5">
+                      <div className="relative w-20 h-28 sm:w-24 sm:h-32 bg-white dark:bg-stone-900 border border-stone-200/50 dark:border-stone-800/40 rounded-xl shadow-xs flex flex-col p-2.5 justify-between">
                         <div className="space-y-2 flex flex-col items-stretch">
                           <div className="h-1 w-3/4 bg-stone-200 dark:bg-stone-800 rounded" />
                           <div className="h-1 w-full bg-stone-200 dark:bg-stone-800 rounded" />
@@ -244,13 +413,32 @@ export default function CoreWorkbench({
                       </div>
 
                       <div className="space-y-2">
-                        <h4 className="font-sans text-sm font-semibold text-stone-800 dark:text-stone-300">
+                        <h4 className="font-sans text-sm font-semibold text-stone-800 dark:text-stone-300 truncate max-w-[260px] mx-auto">
                           {activePdf ? activePdf.name : 'PDF Document'}
                         </h4>
                         <p className="font-sans text-xs text-stone-500 dark:text-stone-500 max-w-sm mx-auto leading-normal">
                           Ready for text & formatting extraction. Adjust target format and options in the right settings panel.
                         </p>
                       </div>
+
+                      {/* Mobile Only: PDF Specs */}
+                      {activePdf && (
+                        <div className="lg:hidden w-full max-w-xs p-3 border border-stone-200/50 dark:border-stone-800/40 bg-stone-50/15 dark:bg-stone-950/20 rounded-xl space-y-2 text-left">
+                          <span className="font-sans text-[9px] font-semibold text-blue-600 dark:text-blue-400 block uppercase tracking-wider">
+                            PDF Details
+                          </span>
+                          <div className="grid grid-cols-2 gap-2 text-xs">
+                            <div>
+                              <span className="text-stone-400 dark:text-stone-500 block text-[9px] uppercase">Size</span>
+                              <span className="font-semibold text-stone-700 dark:text-stone-300 block">{formatSize(activePdf.size)}</span>
+                            </div>
+                            <div>
+                              <span className="text-stone-400 dark:text-stone-500 block text-[9px] uppercase">Pages</span>
+                              <span className="font-semibold text-stone-700 dark:text-stone-300 block">{activePdf.pageCount || 'Unknown'}</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
 
                       <button
                         type="button"

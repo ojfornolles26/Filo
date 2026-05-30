@@ -4,7 +4,7 @@
  */
 
 import React, { useRef, useState } from 'react';
-import { ArrowRightLeft, FileDown, Sliders, ListPlus, Trash2, ArrowUp, ArrowDown, PlusCircle, FileText, Code } from 'lucide-react';
+import { ArrowRightLeft, FileDown, Sliders, ListPlus, Trash2, ArrowUp, ArrowDown, PlusCircle, FileText, Code, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   ConversionMode,
@@ -50,6 +50,7 @@ export default function RightConfigSidebar({
 }: RightConfigSidebarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const updatePdfOption = <K extends keyof ImageToPdfOptions>(key: K, value: ImageToPdfOptions[K]) => {
     setPdfOptions({ ...pdfOptions, [key]: value });
@@ -99,7 +100,7 @@ export default function RightConfigSidebar({
   const isImageMode = mode === 'images-to-pdf';
 
   return (
-    <div className="flex flex-col h-full bg-white/70 dark:bg-stone-950/60 backdrop-blur-md p-6 border border-stone-200/50 dark:border-stone-800/40 rounded-xl justify-between space-y-4 shadow-xs transition-all duration-300 hover:shadow-sm">
+    <div className="flex flex-col h-full bg-white/70 dark:bg-stone-950/60 backdrop-blur-md p-6 border border-stone-200/50 dark:border-stone-800/40 rounded-xl justify-between space-y-4 shadow-xs transition-all duration-300 hover:shadow-sm overflow-hidden">
       
       {/* Hidden file input */}
       <input
@@ -116,7 +117,7 @@ export default function RightConfigSidebar({
       <div className="flex-1 flex flex-col space-y-4 overflow-hidden">
         
         {/* Brand Header */}
-        <div className="flex items-center space-x-2 border-b border-stone-100/60 dark:border-stone-900/40 pb-2.5">
+        <div className="flex items-center space-x-2 border-b border-stone-100/60 dark:border-stone-800/40 pb-2.5">
           <Sliders className="h-4 w-4 text-stone-500" strokeWidth={1.5} />
           <h2 className="font-sans text-xs font-bold uppercase tracking-wider text-stone-700 dark:text-stone-300">
             Workspace Settings
@@ -124,14 +125,14 @@ export default function RightConfigSidebar({
         </div>
 
         {/* Action Toggle Tab */}
-        <div className="grid grid-cols-2 gap-1 bg-stone-100/70 p-1 rounded-lg dark:bg-stone-900/60 border border-stone-200/40 dark:border-stone-800/40 shrink-0">
+        <div className="grid grid-cols-2 gap-1 bg-stone-100/70 p-1 rounded-lg dark:bg-stone-900/60 border border-stone-200/40 dark:border-stone-800/40 shrink-0 select-none">
           <button
             type="button"
             onClick={() => setMode('images-to-pdf')}
-            className={`py-1 rounded-md transition-all text-center font-sans text-xs font-semibold cursor-pointer focus:outline-none ${
+            className={`py-1 rounded-md transition-all text-center font-sans text-xs font-semibold cursor-pointer select-none focus:outline-none focus:ring-0 focus-visible:outline-none active:outline-none outline-hidden border ${
               isImageMode
-                ? 'bg-white text-stone-900 shadow-xs dark:bg-stone-800 dark:text-stone-50 border border-stone-200/50 dark:border-stone-700'
-                : 'text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200'
+                ? 'bg-white text-stone-900 shadow-xs border-stone-200/50 dark:bg-stone-800 dark:text-stone-50 dark:border-stone-700'
+                : 'border-transparent text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200'
             }`}
           >
             Create PDF
@@ -139,10 +140,10 @@ export default function RightConfigSidebar({
           <button
             type="button"
             onClick={() => setMode('pdf-to-formats')}
-            className={`py-1 rounded-md transition-all text-center font-sans text-xs font-semibold cursor-pointer focus:outline-none ${
+            className={`py-1 rounded-md transition-all text-center font-sans text-xs font-semibold cursor-pointer select-none focus:outline-none focus:ring-0 focus-visible:outline-none active:outline-none outline-hidden border ${
               !isImageMode
-                ? 'bg-white text-stone-900 shadow-xs dark:bg-stone-800 dark:text-stone-50 border border-stone-200/50 dark:border-stone-700'
-                : 'text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200'
+                ? 'bg-white text-stone-900 shadow-xs border-stone-200/50 dark:bg-stone-800 dark:text-stone-50 dark:border-stone-700'
+                : 'border-transparent text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200'
             }`}
           >
             Extract Content
@@ -186,105 +187,129 @@ export default function RightConfigSidebar({
                     />
                   </div>
 
-                  {/* Page Format */}
-                  <div className="space-y-1">
-                    <label className="font-sans text-[10px] uppercase text-stone-500 dark:text-stone-500 font-semibold block">
-                      Page Size
-                    </label>
-                    <div className="grid grid-cols-3 gap-1">
-                      {[
-                        { id: 'a4', label: 'A4' },
-                        { id: 'letter', label: 'Letter' },
-                        { id: 'fit', label: 'Fit Photo' }
-                      ].map((item) => (
-                        <button
-                          key={item.id}
-                          type="button"
-                          onClick={() => !isConverting && updatePdfOption('pageFormat', item.id as any)}
-                          className={`py-1 text-[10px] font-semibold rounded border cursor-pointer text-center focus:outline-none transition-colors truncate ${
-                            pdfOptions.pageFormat === item.id
-                              ? 'bg-blue-600/10 border-blue-500 text-blue-600 dark:bg-blue-500/10 dark:border-blue-400 dark:text-blue-400 font-semibold shadow-xs'
-                              : 'bg-white border-stone-200 text-stone-600 hover:border-stone-400 dark:bg-stone-900 dark:border-stone-800 dark:text-stone-400 dark:hover:border-stone-700'
-                          }`}
-                          title={item.id === 'a4' ? 'A4 Size (210 × 297 mm)' : item.id === 'letter' ? 'US Letter (8.5 × 11 in)' : 'Page matches each original photo aspect ratio'}
-                        >
-                          {item.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                  {/* Toggle Advanced options */}
+                  <button
+                    type="button"
+                    onClick={() => setShowAdvanced(!showAdvanced)}
+                    className="flex items-center justify-between w-full py-1.5 text-[10px] font-bold uppercase tracking-wider text-stone-400 hover:text-stone-700 dark:text-stone-500 dark:hover:text-stone-300 focus:outline-none cursor-pointer border-t border-b border-stone-200/30 dark:border-stone-800/30 select-none pt-2 pb-2"
+                  >
+                    <span>Advanced PDF Options</span>
+                    <motion.div animate={{ rotate: showAdvanced ? 180 : 0 }} transition={{ duration: 0.2, ease: "easeInOut" }}>
+                      <ChevronDown className="h-3.5 w-3.5" />
+                    </motion.div>
+                  </button>
 
-                  {/* Orientation */}
-                  <div className="space-y-1">
-                    <label className="font-sans text-[10px] uppercase text-stone-500 dark:text-stone-500 font-semibold block">
-                      Orientation
-                    </label>
-                    <div className="grid grid-cols-3 gap-1">
-                      {[
-                        { id: 'portrait', label: 'Portrait' },
-                        { id: 'landscape', label: 'Landscape' },
-                        { id: 'auto', label: 'Auto Fit' }
-                      ].map((item) => (
-                        <button
-                          key={item.id}
-                          type="button"
-                          onClick={() => !isConverting && updatePdfOption('orientation', item.id as any)}
-                          className={`py-1 text-[10px] font-semibold rounded border cursor-pointer text-center focus:outline-none transition-colors truncate ${
-                            pdfOptions.orientation === item.id
-                              ? 'bg-blue-600/10 border-blue-500 text-blue-600 dark:bg-blue-500/10 dark:border-blue-400 dark:text-blue-400 font-semibold shadow-xs'
-                              : 'bg-white border-stone-200 text-stone-600 hover:border-stone-400 dark:bg-stone-900 dark:border-stone-800 dark:text-stone-400 dark:hover:border-stone-700'
-                          }`}
-                        >
-                          {item.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                  <AnimatePresence initial={false}>
+                    {showAdvanced && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                        className="overflow-hidden space-y-4 pt-1"
+                      >
+                        {/* Page Format */}
+                        <div className="space-y-1">
+                          <label className="font-sans text-[10px] uppercase text-stone-500 dark:text-stone-500 font-semibold block">
+                            Page Size
+                          </label>
+                          <div className="grid grid-cols-3 gap-1">
+                            {[
+                              { id: 'a4', label: 'A4' },
+                              { id: 'letter', label: 'Letter' },
+                              { id: 'fit', label: 'Fit Photo' }
+                            ].map((item) => (
+                              <button
+                                key={item.id}
+                                type="button"
+                                onClick={() => !isConverting && updatePdfOption('pageFormat', item.id as any)}
+                                className={`py-1 text-[10px] font-semibold rounded border cursor-pointer text-center focus:outline-none transition-colors truncate ${
+                                  pdfOptions.pageFormat === item.id
+                                    ? 'bg-blue-600/10 border-blue-500 text-blue-600 dark:bg-blue-500/10 dark:border-blue-400 dark:text-blue-400 font-semibold shadow-xs'
+                                    : 'bg-white border-stone-200 text-stone-600 hover:border-stone-400 dark:bg-stone-900 dark:border-stone-800 dark:text-stone-400 dark:hover:border-stone-700'
+                                }`}
+                                title={item.id === 'a4' ? 'A4 Size (210 × 297 mm)' : item.id === 'letter' ? 'US Letter (8.5 × 11 in)' : 'Page matches each original photo aspect ratio'}
+                              >
+                                {item.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
 
-                  {/* White Border Margins */}
-                  <div className="space-y-1">
-                    <label className="font-sans text-[10px] uppercase text-stone-500 dark:text-stone-500 font-semibold block">
-                      Borders
-                    </label>
-                    <div className="grid grid-cols-3 gap-1">
-                      {[
-                        { id: 0, label: 'None' },
-                        { id: 10, label: 'Thin' },
-                        { id: 20, label: 'Standard' }
-                      ].map((item) => (
-                        <button
-                          key={item.id}
-                          type="button"
-                          onClick={() => !isConverting && updatePdfOption('margin', item.id as any)}
-                          className={`py-1 text-[10px] font-semibold rounded border cursor-pointer text-center focus:outline-none transition-colors truncate ${
-                            pdfOptions.margin === item.id
-                              ? 'bg-blue-600/10 border-blue-500 text-blue-600 dark:bg-blue-500/10 dark:border-blue-400 dark:text-blue-400 font-semibold shadow-xs'
-                              : 'bg-white border-stone-200 text-stone-600 hover:border-stone-400 dark:bg-stone-900 dark:border-stone-800 dark:text-stone-400 dark:hover:border-stone-700'
-                          }`}
-                        >
-                          {item.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                        {/* Orientation */}
+                        <div className="space-y-1">
+                          <label className="font-sans text-[10px] uppercase text-stone-500 dark:text-stone-500 font-semibold block">
+                            Orientation
+                          </label>
+                          <div className="grid grid-cols-3 gap-1">
+                            {[
+                              { id: 'portrait', label: 'Portrait' },
+                              { id: 'landscape', label: 'Landscape' },
+                              { id: 'auto', label: 'Auto Fit' }
+                            ].map((item) => (
+                              <button
+                                key={item.id}
+                                type="button"
+                                onClick={() => !isConverting && updatePdfOption('orientation', item.id as any)}
+                                className={`py-1 text-[10px] font-semibold rounded border cursor-pointer text-center focus:outline-none transition-colors truncate ${
+                                  pdfOptions.orientation === item.id
+                                    ? 'bg-blue-600/10 border-blue-500 text-blue-600 dark:bg-blue-500/10 dark:border-blue-400 dark:text-blue-400 font-semibold shadow-xs'
+                                    : 'bg-white border-stone-200 text-stone-600 hover:border-stone-400 dark:bg-stone-900 dark:border-stone-800 dark:text-stone-400 dark:hover:border-stone-700'
+                                }`}
+                              >
+                                {item.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
 
-                  {/* PDF Compression Quality slider */}
-                  <div className="space-y-1.5 pt-1">
-                    <div className="flex justify-between items-center text-xs">
-                      <span className="font-sans text-stone-600 dark:text-stone-400 font-semibold text-[10px] uppercase tracking-wider">Image Quality</span>
-                      <span className="font-mono text-stone-800 dark:text-stone-200 font-semibold text-xs">{Math.round(pdfOptions.quality * 100)}%</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="0.5"
-                      max="1.0"
-                      step="0.05"
-                      value={pdfOptions.quality}
-                      onChange={(e) => updatePdfOption('quality', parseFloat(e.target.value))}
-                      disabled={isConverting}
-                      className="w-full h-1 accent-stone-900 dark:accent-stone-100 cursor-pointer disabled:opacity-50"
-                    />
-                  </div>
+                        {/* White Border Margins */}
+                        <div className="space-y-1">
+                          <label className="font-sans text-[10px] uppercase text-stone-500 dark:text-stone-500 font-semibold block">
+                            Borders
+                          </label>
+                          <div className="grid grid-cols-3 gap-1">
+                            {[
+                              { id: 0, label: 'None' },
+                              { id: 10, label: 'Thin' },
+                              { id: 20, label: 'Standard' }
+                            ].map((item) => (
+                              <button
+                                key={item.id}
+                                type="button"
+                                onClick={() => !isConverting && updatePdfOption('margin', item.id as any)}
+                                className={`py-1 text-[10px] font-semibold rounded border cursor-pointer text-center focus:outline-none transition-colors truncate ${
+                                  pdfOptions.margin === item.id
+                                    ? 'bg-blue-600/10 border-blue-500 text-blue-600 dark:bg-blue-500/10 dark:border-blue-400 dark:text-blue-400 font-semibold shadow-xs'
+                                    : 'bg-white border-stone-200 text-stone-600 hover:border-stone-400 dark:bg-stone-900 dark:border-stone-800 dark:text-stone-400 dark:hover:border-stone-700'
+                                }`}
+                              >
+                                {item.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* PDF Compression Quality slider */}
+                        <div className="space-y-1.5 pt-1">
+                          <div className="flex justify-between items-center text-xs">
+                            <span className="font-sans text-stone-600 dark:text-stone-400 font-semibold text-[10px] uppercase tracking-wider">Image Quality</span>
+                            <span className="font-mono text-stone-800 dark:text-stone-200 font-semibold text-xs">{Math.round(pdfOptions.quality * 100)}%</span>
+                          </div>
+                          <input
+                            type="range"
+                            min="0.5"
+                            max="1.0"
+                            step="0.05"
+                            value={pdfOptions.quality}
+                            onChange={(e) => updatePdfOption('quality', parseFloat(e.target.value))}
+                            disabled={isConverting}
+                            className="w-full h-1 accent-stone-900 dark:accent-stone-100 cursor-pointer disabled:opacity-50"
+                          />
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </motion.div>
               ) : (
                 /* PDF mode options */
@@ -324,56 +349,80 @@ export default function RightConfigSidebar({
                     </div>
                   </div>
 
-                  {/* Resolution scale (only for image formats) */}
-                  {(formatOptions.targetFormat === 'png' || formatOptions.targetFormat === 'jpeg') && (
-                    <div className="space-y-1">
-                      <label className="font-sans text-[10px] uppercase text-stone-400 dark:text-stone-500 font-semibold block">
-                        Image Resolution
-                      </label>
-                      <div className="grid grid-cols-3 gap-1">
-                        {[
-                          { id: 1, label: '72 DPI (Standard)' },
-                          { id: 2, label: '150 DPI (High)' },
-                          { id: 3, label: '300 DPI (Print)' }
-                        ].map((item) => (
-                          <button
-                            key={item.id}
-                            type="button"
-                            onClick={() => !isConverting && updateFormatOption('resolutionScale', item.id as any)}
-                            className={`w-full py-1 text-[9px] font-semibold rounded border cursor-pointer text-center focus:outline-none transition-colors truncate ${
-                              formatOptions.resolutionScale === item.id
-                                ? 'bg-blue-600/10 border-blue-500 text-blue-600 dark:bg-blue-500/10 dark:border-blue-400 dark:text-blue-400 font-semibold shadow-xs'
-                                : 'border-stone-200/70 hover:border-stone-400 dark:border-stone-800 bg-stone-50/15 text-stone-700 dark:text-stone-300'
-                            }`}
-                          >
-                            {item.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  {/* Toggle Advanced options */}
+                  <button
+                    type="button"
+                    onClick={() => setShowAdvanced(!showAdvanced)}
+                    className="flex items-center justify-between w-full py-1.5 text-[10px] font-bold uppercase tracking-wider text-stone-400 hover:text-stone-700 dark:text-stone-500 dark:hover:text-stone-300 focus:outline-none cursor-pointer border-t border-b border-stone-200/30 dark:border-stone-800/30 select-none pt-2 pb-2"
+                  >
+                    <span>Advanced Options</span>
+                    <motion.div animate={{ rotate: showAdvanced ? 180 : 0 }} transition={{ duration: 0.2, ease: "easeInOut" }}>
+                      <ChevronDown className="h-3.5 w-3.5" />
+                    </motion.div>
+                  </button>
 
-                  {/* Page Range */}
-                  <div className="space-y-1">
-                    <label htmlFor="page-range-input" className="font-sans text-[10px] uppercase text-stone-500 dark:text-stone-500 font-semibold block">
-                      Page Range
-                    </label>
-                    <input
-                      id="page-range-input"
-                      type="text"
-                      value={formatOptions.pageRange}
-                      onChange={(e) => updateFormatOption('pageRange', e.target.value)}
-                      placeholder="e.g. 'all' or '1, 3, 5-8'"
-                      disabled={isConverting}
-                      className="w-full px-3 py-1.5 bg-transparent border border-stone-200 dark:border-stone-800 rounded font-sans text-xs text-stone-900 dark:text-stone-100 focus:outline-none focus:border-stone-400 dark:focus:border-stone-600 focus:ring-1 focus:ring-stone-500/20 disabled:opacity-50"
-                    />
-                  </div>
+                  <AnimatePresence initial={false}>
+                    {showAdvanced && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                        className="overflow-hidden space-y-4 pt-1"
+                      >
+                        {/* Resolution scale (only for image formats) */}
+                        {(formatOptions.targetFormat === 'png' || formatOptions.targetFormat === 'jpeg') && (
+                          <div className="space-y-1">
+                            <label className="font-sans text-[10px] uppercase text-stone-400 dark:text-stone-500 font-semibold block">
+                              Image Resolution
+                            </label>
+                            <div className="grid grid-cols-3 gap-1">
+                              {[
+                                { id: 1, label: '72 DPI (Standard)' },
+                                { id: 2, label: '150 DPI (High)' },
+                                { id: 3, label: '300 DPI (Print)' }
+                              ].map((item) => (
+                                <button
+                                  key={item.id}
+                                  type="button"
+                                  onClick={() => !isConverting && updateFormatOption('resolutionScale', item.id as any)}
+                                  className={`w-full py-1 text-[9px] font-semibold rounded border cursor-pointer text-center focus:outline-none transition-colors truncate ${
+                                    formatOptions.resolutionScale === item.id
+                                      ? 'bg-blue-600/10 border-blue-500 text-blue-600 dark:bg-blue-500/10 dark:border-blue-400 dark:text-blue-400 font-semibold shadow-xs'
+                                      : 'border-stone-200/70 hover:border-stone-400 dark:border-stone-800 bg-stone-50/15 text-stone-700 dark:text-stone-300'
+                                  }`}
+                                >
+                                  {item.label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Page Range */}
+                        <div className="space-y-1">
+                          <label htmlFor="page-range-input" className="font-sans text-[10px] uppercase text-stone-500 dark:text-stone-500 font-semibold block">
+                            Page Range
+                          </label>
+                          <input
+                            id="page-range-input"
+                            type="text"
+                            value={formatOptions.pageRange}
+                            onChange={(e) => updateFormatOption('pageRange', e.target.value)}
+                            placeholder="e.g. 'all' or '1, 3, 5-8'"
+                            disabled={isConverting}
+                            className="w-full px-3 py-1.5 bg-transparent border border-stone-200 dark:border-stone-800 rounded font-sans text-xs text-stone-900 dark:text-stone-100 focus:outline-none focus:border-stone-400 dark:focus:border-stone-600 focus:ring-1 focus:ring-stone-500/20 disabled:opacity-50"
+                          />
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
 
-          <hr className="border-stone-100/60 dark:border-stone-900/40" />
+          <hr className="border-stone-100/60 dark:border-stone-800/40" />
 
           {/* Queue Section (Batch Processing) */}
           <div className="space-y-3">
@@ -485,7 +534,7 @@ export default function RightConfigSidebar({
 
                       {/* Reorder actions */}
                       {isImage && files.filter(f => f.type.startsWith('image/')).length > 1 && (
-                        <div className="flex items-center justify-between pt-1 border-t border-stone-100/40 dark:border-stone-900/20" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-between pt-1 border-t border-stone-100/40 dark:border-stone-800/20" onClick={(e) => e.stopPropagation()}>
                           <span className="font-sans text-[9px] text-stone-400">
                             Page {files.filter(f => f.type.startsWith('image/')).indexOf(file) + 1} of {files.filter(f => f.type.startsWith('image/')).length}
                           </span>
@@ -519,7 +568,7 @@ export default function RightConfigSidebar({
         </div>
       </div>
 
-      <div className="border-t border-stone-100/60 dark:border-stone-900/40 my-2"></div>
+      <div className="border-t border-stone-100/60 dark:border-stone-800/40 my-2"></div>
 
       {/* Action Button */}
       <div className="shrink-0 pt-1">

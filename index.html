@@ -3,15 +3,30 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Filo — Private Document Workspace</title>
+    <title>Filo — Private Client-Side Document Workspace</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%232563eb%22/><path d=%22M30 25h25l15 15v35H30z%22 fill=%22%23ffffff%22/><path d=%22M55 25v15h15z%22 fill=%22%23dbeafe%22/><path d=%22M38 48h24M38 58h24M38 68h14%22 stroke=%22%232563eb%22 stroke-width=%224%22 stroke-linecap=%22round%22/></svg>">
     <meta name="description" content="Convert images to PDF and extract text or formatting from PDFs privately and securely. Everything runs locally in your browser—no file uploads required." />
-    <meta name="keywords" content="PDF converter, image to PDF, extract text, PDF reader, private converter, browser PDF tool" />
+    <meta name="keywords" content="PDF converter, image to PDF, extract text, PDF reader, private converter, browser PDF tool, client-side PDF, markdown extraction, client-side converter" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://filo.works" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://filo.works" />
+    <meta property="og:title" content="Filo — Private Client-Side Document Workspace" />
+    <meta property="og:description" content="Compile images to high-quality PDF or extract plain text and markdown notes from PDFs. 100% private, client-side browser processing—no file uploads required." />
+    <meta property="og:image" content="https://filo.works/og-cover.png" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://filo.works" />
+    <meta property="twitter:title" content="Filo — Private Client-Side Document Workspace" />
+    <meta property="twitter:description" content="Compile images to high-quality PDF or extract plain text and markdown notes from PDFs. 100% private, client-side browser processing—no file uploads required." />
+    <meta property="twitter:image" content="https://filo.works/og-cover.png" />
     <script>
       try {
         const savedTheme = localStorage.getItem('filo-theme');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+        if (savedTheme === 'dark') {
           document.documentElement.classList.add('dark');
         } else {
           document.documentElement.classList.remove('dark');
