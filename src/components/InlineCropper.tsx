@@ -22,6 +22,8 @@ interface InlineCropperProps {
   onRegisterActions: (actions: { reset: () => void; save: () => void } | null) => void;
 }
 
+const CANVAS_PADDING = 20;
+
 interface CropRect {
   x: number;
   y: number;
@@ -184,30 +186,34 @@ export default function InlineCropper({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    canvas.width = renderSize.width;
-    canvas.height = renderSize.height;
+    canvas.width = renderSize.width + CANVAS_PADDING * 2;
+    canvas.height = renderSize.height + CANVAS_PADDING * 2;
+
+    // Clear canvas with background color
+    ctx.fillStyle = '#141211';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.save();
     if (flipH || flipV) {
-      ctx.translate(renderSize.width / 2, renderSize.height / 2);
+      ctx.translate(renderSize.width / 2 + CANVAS_PADDING, renderSize.height / 2 + CANVAS_PADDING);
       ctx.scale(flipH ? -1 : 1, flipV ? -1 : 1);
-      ctx.translate(-renderSize.width / 2, -renderSize.height / 2);
+      ctx.translate(-(renderSize.width / 2 + CANVAS_PADDING), -(renderSize.height / 2 + CANVAS_PADDING));
     }
-    ctx.drawImage(image, 0, 0, renderSize.width, renderSize.height);
+    ctx.drawImage(image, CANVAS_PADDING, CANVAS_PADDING, renderSize.width, renderSize.height);
     ctx.restore();
 
     // Dark screen on cropped region background
     ctx.fillStyle = 'rgba(12, 10, 9, 0.6)';
     
-    const px = cropBox.x * renderSize.width;
-    const py = cropBox.y * renderSize.height;
+    const px = cropBox.x * renderSize.width + CANVAS_PADDING;
+    const py = cropBox.y * renderSize.height + CANVAS_PADDING;
     const pw = cropBox.w * renderSize.width;
     const ph = cropBox.h * renderSize.height;
 
-    ctx.fillRect(0, 0, renderSize.width, py);
-    ctx.fillRect(0, py + ph, renderSize.width, renderSize.height - (py + ph));
+    ctx.fillRect(0, 0, canvas.width, py);
+    ctx.fillRect(0, py + ph, canvas.width, canvas.height - (py + ph));
     ctx.fillRect(0, py, px, ph);
-    ctx.fillRect(px + pw, py, renderSize.width - (px + pw), ph);
+    ctx.fillRect(px + pw, py, canvas.width - (px + pw), ph);
 
     // Crop Outline
     ctx.strokeStyle = '#3b82f6';
@@ -269,8 +275,8 @@ export default function InlineCropper({
 
     if (by < py + 6) by = py + 6;
     if (bx < px + 6) bx = px + 6;
-    if (bx + badgeW > renderSize.width) bx = renderSize.width - badgeW - 6;
-    if (by + badgeH > renderSize.height) by = renderSize.height - badgeH - 6;
+    if (bx + badgeW > canvas.width - 6) bx = canvas.width - badgeW - 6;
+    if (by + badgeH > canvas.height - 6) by = canvas.height - badgeH - 6;
 
     ctx.fillStyle = 'rgba(12, 10, 9, 0.85)';
     ctx.strokeStyle = '#3b82f6';
@@ -294,10 +300,13 @@ export default function InlineCropper({
     const x = clientX - rect.left;
     const y = clientY - rect.top;
 
-    const px = cropBox.x * renderSize.width;
-    const py = cropBox.y * renderSize.height;
-    const pw = cropBox.w * renderSize.width;
-    const ph = cropBox.h * renderSize.height;
+    const scaleX = rect.width / canvasRef.current.width;
+    const scaleY = rect.height / canvasRef.current.height;
+
+    const px = (cropBox.x * renderSize.width + CANVAS_PADDING) * scaleX;
+    const py = (cropBox.y * renderSize.height + CANVAS_PADDING) * scaleY;
+    const pw = (cropBox.w * renderSize.width) * scaleX;
+    const ph = (cropBox.h * renderSize.height) * scaleY;
 
     const threshold = 24;
 
@@ -377,8 +386,15 @@ export default function InlineCropper({
   const moveDrag = (clientX: number, clientY: number) => {
     if (!activeHandle || !dragStart || !canvasRef.current) return;
 
-    const dx = (clientX - dragStart.x) / renderSize.width;
-    const dy = (clientY - dragStart.y) / renderSize.height;
+    const rect = canvasRef.current.getBoundingClientRect();
+    const scaleX = rect.width / canvasRef.current.width;
+    const scaleY = rect.height / canvasRef.current.height;
+
+    const screenImageWidth = renderSize.width * scaleX;
+    const screenImageHeight = renderSize.height * scaleY;
+
+    const dx = (clientX - dragStart.x) / screenImageWidth;
+    const dy = (clientY - dragStart.y) / screenImageHeight;
 
     let nextX = dragStart.boxX;
     let nextY = dragStart.boxY;
@@ -388,9 +404,10 @@ export default function InlineCropper({
     const minSize = 0.05;
 
     if (activeHandle === 'draw') {
-      const rect = canvasRef.current.getBoundingClientRect();
-      const currX = Math.max(0, Math.min(1, (clientX - rect.left) / renderSize.width));
-      const currY = Math.max(0, Math.min(1, (clientY - rect.top) / renderSize.height));
+      const clickImageX = clientX - rect.left - CANVAS_PADDING * scaleX;
+      const clickImageY = clientY - rect.top - CANVAS_PADDING * scaleY;
+      const currX = Math.max(0, Math.min(1, clickImageX / screenImageWidth));
+      const currY = Math.max(0, Math.min(1, clickImageY / screenImageHeight));
 
       const startX = dragStart.boxX;
       const startY = dragStart.boxY;
@@ -570,8 +587,17 @@ export default function InlineCropper({
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!canvasRef.current) return;
     const rect = canvasRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / renderSize.width;
-    const y = (e.clientY - rect.top) / renderSize.height;
+    const scaleX = rect.width / canvasRef.current.width;
+    const scaleY = rect.height / canvasRef.current.height;
+
+    const screenImageWidth = renderSize.width * scaleX;
+    const screenImageHeight = renderSize.height * scaleY;
+
+    const clickImageX = e.clientX - rect.left - CANVAS_PADDING * scaleX;
+    const clickImageY = e.clientY - rect.top - CANVAS_PADDING * scaleY;
+
+    const x = Math.max(0, Math.min(1, clickImageX / screenImageWidth));
+    const y = Math.max(0, Math.min(1, clickImageY / screenImageHeight));
     startDrag(e.clientX, e.clientY, x, y);
   };
 
@@ -595,8 +621,17 @@ export default function InlineCropper({
     if (e.touches.length === 0 || !canvasRef.current) return;
     const touch = e.touches[0];
     const rect = canvasRef.current.getBoundingClientRect();
-    const x = (touch.clientX - rect.left) / renderSize.width;
-    const y = (touch.clientY - rect.top) / renderSize.height;
+    const scaleX = rect.width / canvasRef.current.width;
+    const scaleY = rect.height / canvasRef.current.height;
+
+    const screenImageWidth = renderSize.width * scaleX;
+    const screenImageHeight = renderSize.height * scaleY;
+
+    const clickImageX = touch.clientX - rect.left - CANVAS_PADDING * scaleX;
+    const clickImageY = touch.clientY - rect.top - CANVAS_PADDING * scaleY;
+
+    const x = Math.max(0, Math.min(1, clickImageX / screenImageWidth));
+    const y = Math.max(0, Math.min(1, clickImageY / screenImageHeight));
     startDrag(touch.clientX, touch.clientY, x, y);
   };
 
