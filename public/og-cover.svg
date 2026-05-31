@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <!-- Import Google Fonts: Inter and Newsreader -->
+    <style type="text/css"><![CDATA[
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@1,6..72,400;1,6..72,500;1,6..72,600;1,6..72,700&display=swap');
+
+      .font-brand {
+        font-family: 'Newsreader', Georgia, serif;
+        font-style: italic;
+      }
+      .font-sans {
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      }
+    ]]></style>
+
+    <!-- Deep Blur for Ambient Background Glows -->
+    <filter id="ambient-blur" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="100" />
+    </filter>
+
+    <!-- Ambient Gradients -->
+    <radialGradient id="blue-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#2563eb" stop-opacity="1" />
+      <stop offset="100%" stop-color="#2563eb" stop-opacity="0" />
+    </radialGradient>
+    
+    <radialGradient id="stone-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#78716c" stop-opacity="1" />
+      <stop offset="100%" stop-color="#78716c" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <!-- 1. Deep Rich Background -->
+  <rect width="100%" height="100%" fill="#0c0a09" />
+  
+  <!-- 2. Ambient Editorial Glows (Sleek light-play in background) -->
+  <g filter="url(#ambient-blur)" opacity="0.35">
+    <!-- Center blue glow focusing on logo/branding -->
+    <circle cx="600" cy="315" r="340" fill="url(#blue-glow)" />
+    <!-- Subtle bottom-left warm stone glow -->
+    <circle cx="150" cy="550" r="280" fill="url(#stone-glow)" opacity="0.4" />
+    <!-- Subtle top-right warm stone glow -->
+    <circle cx="1050" cy="80" r="250" fill="url(#stone-glow)" opacity="0.3" />
+  </g>
+
+  <!-- 3. Centered Minimalist Branding Group (Perfectly Balanced Vertically) -->
+  
+  <!-- Horizontal Logo + Name Lockup (Centered Horizontally) -->
+  <g transform="translate(478, 202)">
+    <!-- Logo Symbol (scaled to 95px tall) -->
+    <g transform="scale(0.95)">
+      <rect width="100" height="100" rx="22" fill="#2563eb" />
+      <path d="M30 25h25l15 15v35H30z" fill="#ffffff" />
+      <path d="M55 25v15h15z" fill="#dbeafe" />
+      <path d="M38 48h24M38 58h24M38 68h14" stroke="#2563eb" stroke-width="4" stroke-linecap="round" />
+    </g>
+    <!-- Title "Filo" (Aligned on the right of the logo) -->
+    <text x="115" y="72" class="font-brand" font-size="76" font-weight="700" fill="#ffffff" text-anchor="start" letter-spacing="-0.01em">Filo</text>
+  </g>
+
+  <!-- Tagline (Centered below the lockup) -->
+  <text x="600" y="362" class="font-sans" font-size="28" font-weight="700" fill="#f5f5f4" text-anchor="middle" letter-spacing="-0.03em">
+    Private Client-Side Document Workspace
+  </text>
+
+  <!-- Description / Core Services (Centered below the tagline) -->
+  <text x="600" y="412" class="font-sans" font-size="16" font-weight="400" fill="#a8a29e" text-anchor="middle" letter-spacing="0.01em">
+    Compile Images to PDF  •  Extract Text &amp; Markdown Notes  •  100% Client-Side
+  </text>
+
+</svg>
