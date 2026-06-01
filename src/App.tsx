@@ -618,30 +618,30 @@ export default function App() {
 
               {/* Quick Feature Guides */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto pt-4 relative z-10">
-                <div className="p-5 bg-white/35 dark:bg-stone-950/15 backdrop-blur-md border border-stone-200/50 dark:border-stone-800/30 rounded-2xl space-y-2.5 transition-all duration-300 hover:bg-white/55 dark:hover:bg-stone-950/25">
+                <div className="p-5 bg-white/70 dark:bg-stone-900/60 backdrop-blur-md border border-stone-200 dark:border-stone-800/85 rounded-2xl space-y-2.5 transition-all duration-300 hover:bg-white/80 dark:hover:bg-stone-900/85 shadow-2xs">
                   <div className="flex items-center space-x-2.5">
                     <div className="p-2 rounded-lg bg-blue-600/10 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400 flex items-center justify-center">
                       <Image className="h-4 w-4" />
                     </div>
-                    <h3 className="font-sans text-xs font-bold uppercase tracking-wider text-stone-800 dark:text-stone-200">
+                    <h3 className="font-sans text-xs font-bold uppercase tracking-wider text-stone-900 dark:text-stone-100">
                       Create PDFs
                     </h3>
                   </div>
-                  <p className="font-sans text-[11px] leading-relaxed text-stone-500 dark:text-stone-400">
+                  <p className="font-sans text-xs leading-relaxed text-stone-600 dark:text-stone-300">
                     Compile multiple images (PNG, JPG, WebP) into structured, high-quality PDFs. Adjust page settings (A4, Letter, or Fit), margins, orientation, and crop elements in real-time.
                   </p>
                 </div>
 
-                <div className="p-5 bg-white/35 dark:bg-stone-950/15 backdrop-blur-md border border-stone-200/50 dark:border-stone-800/30 rounded-2xl space-y-2.5 transition-all duration-300 hover:bg-white/55 dark:hover:bg-stone-950/25">
+                <div className="p-5 bg-white/70 dark:bg-stone-900/60 backdrop-blur-md border border-stone-200 dark:border-stone-800/85 rounded-2xl space-y-2.5 transition-all duration-300 hover:bg-white/80 dark:hover:bg-stone-900/85 shadow-2xs">
                   <div className="flex items-center space-x-2.5">
                     <div className="p-2 rounded-lg bg-emerald-600/10 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 flex items-center justify-center">
                       <FileText className="h-4 w-4" />
                     </div>
-                    <h3 className="font-sans text-xs font-bold uppercase tracking-wider text-stone-800 dark:text-stone-200">
+                    <h3 className="font-sans text-xs font-bold uppercase tracking-wider text-stone-900 dark:text-stone-100">
                       Extract Content
                     </h3>
                   </div>
-                  <p className="font-sans text-[11px] leading-relaxed text-stone-500 dark:text-stone-400">
+                  <p className="font-sans text-xs leading-relaxed text-stone-600 dark:text-stone-300">
                     Pull structured text and layout directories out of PDF files. Convert documents directly into Markdown notes or clean Plain Text, choosing custom page ranges.
                   </p>
                 </div>
@@ -900,15 +900,15 @@ export default function App() {
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
             className="border-t border-stone-200 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-950/30 py-6 mt-16 w-full"
           >
-            <div className="w-full max-w-[1440px] mx-auto px-6 lg:px-8 text-center font-sans text-[9px] uppercase tracking-widest text-stone-400/80 dark:text-stone-500/80 font-medium space-y-2">
+            <div className="w-full max-w-[1440px] mx-auto px-6 lg:px-8 text-center font-sans text-[9px] uppercase tracking-widest text-stone-500 dark:text-stone-400 font-medium space-y-2">
               <div>
                 &copy; {new Date().getFullYear()} Filo &bull; 100% Private &bull; Processed Locally (Files Never Leave Your Device)
               </div>
-              <div className="flex items-center justify-center space-x-4 font-semibold">
+              <div className="flex items-center justify-center space-x-4 font-bold">
                 <button
                   type="button"
                   onClick={() => setActiveLegalDoc('privacy')}
-                  className="hover:text-stone-600 dark:hover:text-stone-300 transition-colors cursor-pointer focus:outline-none"
+                  className="text-stone-600 hover:text-stone-900 dark:text-stone-300 dark:hover:text-white transition-colors cursor-pointer focus:outline-none"
                 >
                   Privacy Policy
                 </button>
@@ -916,7 +916,7 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => setActiveLegalDoc('terms')}
-                  className="hover:text-stone-600 dark:hover:text-stone-300 transition-colors cursor-pointer focus:outline-none"
+                  className="text-stone-600 hover:text-stone-900 dark:text-stone-300 dark:hover:text-white transition-colors cursor-pointer focus:outline-none"
                 >
                   Terms of Service
                 </button>
