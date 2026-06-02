@@ -59,7 +59,8 @@ export default function FaqSection() {
           return (
             <div
               key={idx}
-              className="border border-stone-200 dark:border-stone-800/85 bg-white/70 dark:bg-stone-900/60 backdrop-blur-md rounded-xl overflow-hidden transition-all duration-300 hover:border-stone-300 dark:hover:border-stone-700 shadow-2xs"
+              style={{ overflowAnchor: 'none' }}
+              className="border border-stone-200 dark:border-stone-800/85 bg-white/70 dark:bg-stone-900/60 backdrop-blur-md rounded-xl overflow-hidden transition-colors duration-300 hover:border-stone-300 dark:hover:border-stone-700 shadow-2xs"
             >
               <button
                 type="button"
@@ -81,6 +82,7 @@ export default function FaqSection() {
               <AnimatePresence initial={false}>
                 {isOpen && (
                   <motion.div
+                    key="faq-content"
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}

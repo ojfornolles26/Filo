@@ -202,6 +202,7 @@ export default function RightConfigSidebar({
                   <AnimatePresence initial={false}>
                     {showAdvanced && (
                       <motion.div
+                        key="advanced-options-images"
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
@@ -371,6 +372,7 @@ export default function RightConfigSidebar({
                   <AnimatePresence initial={false}>
                     {showAdvanced && (
                       <motion.div
+                        key="advanced-options-pdf"
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
@@ -450,10 +452,10 @@ export default function RightConfigSidebar({
               onDragLeave={handleDrag}
               onDrop={handleDrop}
               onClick={triggerBrowse}
-              className={`flex flex-col items-center justify-center border border-dashed rounded-xl py-3 px-3 text-center transition-all cursor-pointer select-none ${
+              className={`flex flex-col items-center justify-center border-2 border-dashed rounded-xl py-3 px-3 text-center transition-all cursor-pointer select-none ${
                 isDragOver
                   ? 'border-blue-500 bg-blue-50/10 dark:border-blue-400'
-                  : 'border-stone-200/60 dark:border-stone-800/40 bg-stone-500/5 hover:bg-stone-100 dark:hover:bg-stone-900/30'
+                  : 'border-stone-300 dark:border-stone-700/80 bg-stone-500/5 hover:bg-stone-100 dark:hover:bg-stone-900/30'
               }`}
             >
               <div className="flex items-center space-x-1.5 text-stone-700 dark:text-stone-300">

@@ -36,28 +36,29 @@ export default function LegalModal({ type, onClose }: LegalModalProps) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
-  if (!type) return null;
-
   const isPrivacy = type === 'privacy';
 
   return (
     <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.2 }}
-        onClick={onClose}
-        className="fixed inset-0 bg-[#0c0a09]/45 dark:bg-[#0c0a09]/75 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-      >
+      {type && (
         <motion.div
-          initial={{ opacity: 0, scale: 0.96, y: 15 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.96, y: 15 }}
-          transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-          onClick={(e) => e.stopPropagation()}
-          className="w-full max-w-2xl max-h-[85vh] flex flex-col bg-[#f7f5f0] dark:bg-[#0c0a09] border border-stone-200 dark:border-stone-800 rounded-2xl shadow-xl overflow-hidden"
+          key="legal-modal-backdrop"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          onClick={onClose}
+          className="fixed inset-0 bg-[#0c0a09]/45 dark:bg-[#0c0a09]/75 backdrop-blur-sm z-50 flex items-center justify-center p-4"
         >
+          <motion.div
+            key="legal-modal-content"
+            initial={{ opacity: 0, scale: 0.96, y: 15 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 15 }}
+            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-2xl max-h-[85vh] flex flex-col bg-[#f7f5f0] dark:bg-[#0c0a09] border border-stone-200 dark:border-stone-800 rounded-2xl shadow-xl overflow-hidden"
+          >
           {/* Header */}
           <div className="px-6 py-4 border-b border-stone-200/50 dark:border-stone-800/40 flex items-center justify-between shrink-0 bg-white/40 dark:bg-stone-950/20 backdrop-blur-md">
             <div className="flex items-center space-x-2.5">
@@ -192,14 +193,15 @@ export default function LegalModal({ type, onClose }: LegalModalProps) {
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg bg-stone-900 hover:bg-stone-800 text-stone-100 dark:bg-stone-100 dark:hover:bg-stone-200 dark:text-stone-950 font-sans text-xs font-semibold shadow-sm transition-all duration-200 cursor-pointer flex items-center space-x-1.5 focus:outline-none focus:ring-0 focus-visible:outline-none"
+              className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-400 font-sans text-xs font-semibold shadow-sm transition-all duration-200 cursor-pointer flex items-center space-x-1.5 focus:outline-none focus:ring-0 focus-visible:outline-none"
             >
               <CheckCircle className="h-3.5 w-3.5" />
               <span>Acknowledge & Close</span>
             </button>
           </div>
+          </motion.div>
         </motion.div>
-      </motion.div>
+      )}
     </AnimatePresence>
   );
 }

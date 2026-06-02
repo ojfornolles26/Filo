@@ -478,7 +478,7 @@ export default function App() {
 
   return (
     <div className={`relative bg-[#f7f5f0] dark:bg-[#0c0a09] text-[#1c1917] dark:text-[#f5f5f4] editorial-transition font-sans flex flex-col ${
-      isWorkspaceActive ? 'h-[100dvh] overflow-hidden' : 'min-h-screen justify-between'
+      isWorkspaceActive ? 'h-[100dvh] overflow-hidden' : 'min-h-screen justify-start'
     }`}>
       {/* Ambient background glows to create a deep, premium editorial atmosphere */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
@@ -555,7 +555,7 @@ export default function App() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.985, y: -8 }}
             transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-            className="flex-grow flex flex-col justify-center"
+            className="flex-grow flex flex-col justify-start"
           >
             <main className="w-full max-w-[1440px] mx-auto px-6 lg:px-8 py-10 md:py-16 space-y-12">
               
@@ -589,10 +589,10 @@ export default function App() {
                   onDragLeave={handleLandingDrag}
                   onDrop={handleLandingDrop}
                   onClick={triggerLandingBrowse}
-                  className={`border border-dashed backdrop-blur-md p-10 md:p-14 rounded-2xl cursor-pointer text-center select-none transition-all duration-300 flex flex-col items-center justify-center space-y-5 ${
+                  className={`border-2 border-dashed backdrop-blur-md p-10 md:p-14 rounded-2xl cursor-pointer text-center select-none transition-all duration-300 flex flex-col items-center justify-center space-y-5 ${
                     isLandingDragOver
                       ? 'border-blue-500 bg-blue-50/10 dark:bg-blue-950/15 shadow-md scale-[1.01]'
-                      : 'border-stone-300 dark:border-stone-800/60 hover:border-blue-500/50 dark:hover:border-blue-500/40 bg-white/40 dark:bg-stone-950/20 hover:bg-white/60 dark:hover:bg-stone-950/30 shadow-xs hover:shadow-sm'
+                      : 'border-stone-300 dark:border-stone-700/80 hover:border-blue-500/60 dark:hover:border-blue-400/50 bg-white/40 dark:bg-stone-950/20 hover:bg-white/60 dark:hover:bg-stone-950/30 shadow-xs hover:shadow-sm'
                   }`}
                 >
                   <div className="p-4 rounded-full border border-stone-200/30 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-xs flex items-center justify-center text-stone-700 dark:text-stone-300 transition-colors">
@@ -673,6 +673,7 @@ export default function App() {
                 <AnimatePresence>
                   {isConverting && (
                     <motion.div
+                      key="progress-overlay"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
@@ -716,6 +717,7 @@ export default function App() {
                 <AnimatePresence>
                   {result && (
                     <motion.div
+                      key="result-overlay"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
@@ -742,6 +744,7 @@ export default function App() {
                 <AnimatePresence>
                   {conversionError && (
                     <motion.div
+                      key="error-overlay"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
@@ -894,13 +897,14 @@ export default function App() {
       <AnimatePresence>
         {!isWorkspaceActive && (
           <motion.footer
+            key="footer"
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 40 }}
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
             className="border-t border-stone-200 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-950/30 py-6 mt-16 w-full"
           >
-            <div className="w-full max-w-[1440px] mx-auto px-6 lg:px-8 text-center font-sans text-[9px] uppercase tracking-widest text-stone-500 dark:text-stone-400 font-medium space-y-2">
+            <div className="w-full max-w-[1440px] mx-auto px-6 lg:px-8 text-center font-sans text-xs uppercase tracking-widest text-stone-500 dark:text-stone-400 font-medium space-y-2">
               <div>
                 &copy; {new Date().getFullYear()} Filo &bull; 100% Private &bull; Processed Locally (Files Never Leave Your Device)
               </div>

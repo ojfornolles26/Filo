@@ -129,10 +129,10 @@ export default function CoreWorkbench({
             onDragLeave={handleDrag}
             onDrop={handleDrop}
             onClick={triggerBrowse}
-            className={`w-full h-full lg:min-h-[380px] min-h-[250px] border border-dashed rounded-xl cursor-pointer flex flex-col items-center justify-center p-6 sm:p-8 text-center transition-all select-none ${
+            className={`w-full h-full lg:min-h-[380px] min-h-[250px] border-2 border-dashed rounded-xl cursor-pointer flex flex-col items-center justify-center p-6 sm:p-8 text-center transition-all select-none ${
               isDragOver
                 ? 'border-blue-500 bg-stone-100 dark:bg-stone-900/40'
-                : 'border-stone-200/60 hover:border-stone-400 dark:border-stone-800/50 dark:hover:border-stone-700 bg-stone-50/10 dark:bg-stone-900/15'
+                : 'border-stone-300 hover:border-blue-500/60 dark:border-stone-700/80 dark:hover:border-blue-400/50 bg-stone-50/10 dark:bg-stone-900/15'
             }`}
           >
             <motion.div
