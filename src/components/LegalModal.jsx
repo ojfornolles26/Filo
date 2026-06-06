@@ -7,12 +7,7 @@ import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Shield, FileText, CheckCircle } from 'lucide-react';
 
-interface LegalModalProps {
-  type: 'privacy' | 'terms' | null;
-  onClose: () => void;
-}
-
-export default function LegalModal({ type, onClose }: LegalModalProps) {
+export default function LegalModal({ type, onClose }) {
   // Prevent body scroll when modal is open
   useEffect(() => {
     if (type) {
@@ -27,7 +22,7 @@ export default function LegalModal({ type, onClose }: LegalModalProps) {
 
   // Handle Escape key to close modal
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
         onClose();
       }

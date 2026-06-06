@@ -6,30 +6,6 @@
 import React, { useRef, useState } from 'react';
 import { ArrowRightLeft, FileDown, Sliders, ListPlus, Trash2, ArrowUp, ArrowDown, PlusCircle, FileText, Code, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import {
-  ConversionMode,
-  ImageToPdfOptions,
-  PdfToFormatOptions,
-  FiloFile
-} from '../types';
-
-interface RightConfigSidebarProps {
-  mode: ConversionMode;
-  setMode: (mode: ConversionMode) => void;
-  pdfOptions: ImageToPdfOptions;
-  setPdfOptions: (opts: ImageToPdfOptions) => void;
-  formatOptions: PdfToFormatOptions;
-  setFormatOptions: (opts: PdfToFormatOptions) => void;
-  onConvert: () => void;
-  isConverting: boolean;
-  files: FiloFile[];
-  onFilesAdded: (fileList: FileList | File[]) => void;
-  onRemoveFile: (id: string) => void;
-  onMoveUp: (idx: number) => void;
-  onMoveDown: (idx: number) => void;
-  activeCropFile: FiloFile | null;
-  setActiveCropFile: (file: FiloFile | null) => void;
-}
 
 export default function RightConfigSidebar({
   mode,
@@ -47,20 +23,20 @@ export default function RightConfigSidebar({
   onMoveDown,
   activeCropFile,
   setActiveCropFile
-}: RightConfigSidebarProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
+}) {
+  const fileInputRef = useRef(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  const updatePdfOption = <K extends keyof ImageToPdfOptions>(key: K, value: ImageToPdfOptions[K]) => {
+  const updatePdfOption = (key, value) => {
     setPdfOptions({ ...pdfOptions, [key]: value });
   };
 
-  const updateFormatOption = <K extends keyof PdfToFormatOptions>(key: K, value: PdfToFormatOptions[K]) => {
+  const updateFormatOption = (key, value) => {
     setFormatOptions({ ...formatOptions, [key]: value });
   };
 
-  const handleDrag = (e: React.DragEvent) => {
+  const handleDrag = (e) => {
     e.preventDefault();
     e.stopPropagation();
     if (e.type === 'dragenter' || e.type === 'dragover') {
@@ -70,7 +46,7 @@ export default function RightConfigSidebar({
     }
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = (e) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragOver(false);
@@ -79,7 +55,7 @@ export default function RightConfigSidebar({
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e) => {
     if (e.target.files && e.target.files.length > 0) {
       onFilesAdded(e.target.files);
     }
@@ -89,7 +65,7 @@ export default function RightConfigSidebar({
     fileInputRef.current?.click();
   };
 
-  const formatSize = (bytes: number): string => {
+  const formatSize = (bytes) => {
     if (bytes === 0) return '0 B';
     const k = 1024;
     const sizes = ['B', 'KB', 'MB'];
@@ -223,7 +199,7 @@ export default function RightConfigSidebar({
                               <button
                                 key={item.id}
                                 type="button"
-                                onClick={() => !isConverting && updatePdfOption('pageFormat', item.id as any)}
+                                onClick={() => !isConverting && updatePdfOption('pageFormat', item.id)}
                                 className={`py-1 text-[10px] font-semibold rounded border cursor-pointer text-center focus:outline-none transition-colors truncate ${
                                   pdfOptions.pageFormat === item.id
                                     ? 'bg-blue-600/10 border-blue-500 text-blue-600 dark:bg-blue-500/10 dark:border-blue-400 dark:text-blue-400 font-semibold shadow-xs'
@@ -251,7 +227,7 @@ export default function RightConfigSidebar({
                               <button
                                 key={item.id}
                                 type="button"
-                                onClick={() => !isConverting && updatePdfOption('orientation', item.id as any)}
+                                onClick={() => !isConverting && updatePdfOption('orientation', item.id)}
                                 className={`py-1 text-[10px] font-semibold rounded border cursor-pointer text-center focus:outline-none transition-colors truncate ${
                                   pdfOptions.orientation === item.id
                                     ? 'bg-blue-600/10 border-blue-500 text-blue-600 dark:bg-blue-500/10 dark:border-blue-400 dark:text-blue-400 font-semibold shadow-xs'
@@ -278,7 +254,7 @@ export default function RightConfigSidebar({
                               <button
                                 key={item.id}
                                 type="button"
-                                onClick={() => !isConverting && updatePdfOption('margin', item.id as any)}
+                                onClick={() => !isConverting && updatePdfOption('margin', item.id)}
                                 className={`py-1 text-[10px] font-semibold rounded border cursor-pointer text-center focus:outline-none transition-colors truncate ${
                                   pdfOptions.margin === item.id
                                     ? 'bg-blue-600/10 border-blue-500 text-blue-600 dark:bg-blue-500/10 dark:border-blue-400 dark:text-blue-400 font-semibold shadow-xs'
@@ -300,14 +276,14 @@ export default function RightConfigSidebar({
                             </span>
                           </div>
                           <input
-                            type="range"
-                            min="0.5"
-                            max="1.0"
-                            step="0.05"
-                            value={pdfOptions.quality}
-                            onChange={(e) => updatePdfOption('quality', parseFloat(e.target.value))}
-                            disabled={isConverting}
-                            className="w-full h-1 accent-stone-900 dark:accent-stone-100 cursor-pointer disabled:opacity-50"
+                             type="range"
+                             min="0.5"
+                             max="1.0"
+                             step="0.05"
+                             value={pdfOptions.quality}
+                             onChange={(e) => updatePdfOption('quality', parseFloat(e.target.value))}
+                             disabled={isConverting}
+                             className="w-full h-1 accent-stone-900 dark:accent-stone-100 cursor-pointer disabled:opacity-50"
                           />
                           <p className="font-sans text-[9px] text-stone-400 dark:text-stone-500 leading-normal">
                             {pdfOptions.quality === 1
@@ -344,7 +320,7 @@ export default function RightConfigSidebar({
                         <button
                           key={item.id}
                           type="button"
-                          onClick={() => !isConverting && updateFormatOption('targetFormat', item.id as any)}
+                          onClick={() => !isConverting && updateFormatOption('targetFormat', item.id)}
                           className={`py-1.5 text-[10px] font-semibold rounded border cursor-pointer text-center focus:outline-none transition-colors leading-tight ${
                             formatOptions.targetFormat === item.id
                               ? 'bg-blue-600/10 border-blue-500 text-blue-600 dark:bg-blue-500/10 dark:border-blue-400 dark:text-blue-400 font-semibold shadow-xs'
@@ -394,7 +370,7 @@ export default function RightConfigSidebar({
                                 <button
                                   key={item.id}
                                   type="button"
-                                  onClick={() => !isConverting && updateFormatOption('resolutionScale', item.id as any)}
+                                  onClick={() => !isConverting && updateFormatOption('resolutionScale', item.id)}
                                   className={`w-full py-1 text-[9px] font-semibold rounded border cursor-pointer text-center focus:outline-none transition-colors truncate ${
                                     formatOptions.resolutionScale === item.id
                                       ? 'bg-blue-600/10 border-blue-500 text-blue-600 dark:bg-blue-500/10 dark:border-blue-400 dark:text-blue-400 font-semibold shadow-xs'

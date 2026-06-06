@@ -4,18 +4,17 @@
  */
 
 import { jsPDF } from 'jspdf';
-import { FiloFile, ImageToPdfOptions, ConversionResult } from '../types';
 
-const readAsDataURL = (file: File): Promise<string> => {
+const readAsDataURL = (file) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
+    reader.onload = () => resolve(reader.result);
     reader.onerror = () => reject(new Error(`Failed to read ${file.name}`));
     reader.readAsDataURL(file);
   });
 };
 
-const getImageDimensions = (base64Url: string): Promise<{ width: number; height: number }> => {
+const getImageDimensions = (base64Url) => {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.src = base64Url;
@@ -25,14 +24,14 @@ const getImageDimensions = (base64Url: string): Promise<{ width: number; height:
 };
 
 // Help map mime types to jsPDF image formats
-const getJsPdfImageFormat = (mimeType: string): string => {
+const getJsPdfImageFormat = (mimeType) => {
   const t = mimeType.toLowerCase();
   if (t.includes('png')) return 'PNG';
   if (t.includes('webp')) return 'WEBP';
   return 'JPEG'; // Default fallback
 };
 
-const convertToPngDataUrl = (base64Url: string): Promise<string> => {
+const convertToPngDataUrl = (base64Url) => {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.src = base64Url;
@@ -53,10 +52,10 @@ const convertToPngDataUrl = (base64Url: string): Promise<string> => {
 };
 
 const processImageForPdf = async (
-  fileObject: File,
-  mimeType: string,
-  quality: number
-): Promise<{ base64Data: string; format: string }> => {
+  fileObject,
+  mimeType,
+  quality
+) => {
   const originalBase64 = await readAsDataURL(fileObject);
   const format = getJsPdfImageFormat(mimeType);
 
@@ -90,10 +89,10 @@ const processImageForPdf = async (
 };
 
 export const compileImagesToPdf = async (
-  files: FiloFile[],
-  options: ImageToPdfOptions,
-  onProgress: (percent: number, stepLabel: string) => void
-): Promise<ConversionResult> => {
+  files,
+  options,
+  onProgress
+) => {
   const activeFiles = files.filter(f => f.status !== 'failed');
   if (activeFiles.length === 0) {
     throw new Error('No valid files to convert');
@@ -101,7 +100,7 @@ export const compileImagesToPdf = async (
 
   onProgress(5, 'Starting converter...');
   const total = activeFiles.length;
-  let pdf: jsPDF | null = null;
+  let pdf = null;
 
   // Sizing definitions in mm
   const PAGE_SIZES = {
@@ -132,7 +131,7 @@ export const compileImagesToPdf = async (
       // 3. Determine Page Setup and orientation
       let pageW = 210;
       let pageH = 297;
-      let finalOrientation: 'portrait' | 'landscape' = 'portrait';
+      let finalOrientation = 'portrait';
 
       if (options.orientation === 'auto') {
         finalOrientation = isLandscapeImage ? 'landscape' : 'portrait';
@@ -214,7 +213,7 @@ export const compileImagesToPdf = async (
         options.quality === 1 ? 'NONE' : 'FAST'
       );
 
-    } catch (err: any) {
+    } catch (err) {
       console.error(`Error adding image ${filoFile.name}:`, err);
       // We continue to compile other files but flag this one failed
       filoFile.status = 'failed';

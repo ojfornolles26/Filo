@@ -7,15 +7,10 @@ import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
-interface FaqItem {
-  question: string;
-  answer: string;
-}
-
 export default function FaqSection() {
-  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+  const [expandedIndex, setExpandedIndex] = useState(null);
 
-  const faqs: FaqItem[] = [
+  const faqs = [
     {
       question: "How is my privacy protected? Where are my files uploaded?",
       answer: "Your files are never uploaded anywhere! Filo works 100% locally on your own computer or phone. All tools—like cutting, rotating, grouping pictures into PDFs, and pulling out text—happen entirely inside your web browser. Your documents never touch the internet or any external servers, meaning your data stays completely private and secure."
@@ -38,7 +33,7 @@ export default function FaqSection() {
     }
   ];
 
-  const toggleExpand = (idx: number) => {
+  const toggleExpand = (idx) => {
     setExpandedIndex(expandedIndex === idx ? null : idx);
   };
 

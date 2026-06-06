@@ -6,30 +6,8 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Crop, Check, RefreshCw, FlipHorizontal, FlipVertical, Grid } from 'lucide-react';
-import { FiloFile } from '../types';
-
-interface InlineCropperProps {
-  file: FiloFile;
-  onSave: (croppedFile: File, previewUrl: string, size: number) => void;
-  aspectRatioType: 'free' | 'original' | '1:1' | '4:3';
-  setAspectRatioType: (type: 'free' | 'original' | '1:1' | '4:3') => void;
-  flipH: boolean;
-  setFlipH: (val: boolean) => void;
-  flipV: boolean;
-  setFlipV: (val: boolean) => void;
-  showGrid: boolean;
-  setShowGrid: (val: boolean) => void;
-  onRegisterActions: (actions: { reset: () => void; save: () => void } | null) => void;
-}
 
 const CANVAS_PADDING = 20;
-
-interface CropRect {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-}
 
 export default function InlineCropper({
   file,
@@ -43,28 +21,21 @@ export default function InlineCropper({
   showGrid,
   setShowGrid,
   onRegisterActions
-}: InlineCropperProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+}) {
+  const canvasRef = useRef(null);
+  const containerRef = useRef(null);
 
-  const [image, setImage] = useState<HTMLImageElement | null>(null);
+  const [image, setImage] = useState(null);
   const [naturalSize, setNaturalSize] = useState({ width: 0, height: 0 });
   const [renderSize, setRenderSize] = useState({ width: 0, height: 0 });
   const [isReady, setIsReady] = useState(false);
   const isLocked = aspectRatioType !== 'free';
   
   // Crop relative rectangle (relative constraints: 0 to 1)
-  const [cropBox, setCropBox] = useState<CropRect>({ x: 0.1, y: 0.1, w: 0.8, h: 0.8 });
-  const [activeHandle, setActiveHandle] = useState<string | null>(null);
-  const [hoverHandle, setHoverHandle] = useState<string | null>(null);
-  const [dragStart, setDragStart] = useState<{
-    x: number;
-    y: number;
-    boxX: number;
-    boxY: number;
-    boxW: number;
-    boxH: number;
-  } | null>(null);
+  const [cropBox, setCropBox] = useState({ x: 0.1, y: 0.1, w: 0.8, h: 0.8 });
+  const [activeHandle, setActiveHandle] = useState(null);
+  const [hoverHandle, setHoverHandle] = useState(null);
+  const [dragStart, setDragStart] = useState(null);
 
   // Re-load image when Selected File or its preview source shifts 
   useEffect(() => {
@@ -244,7 +215,7 @@ export default function InlineCropper({
     ctx.strokeStyle = '#1c1917';
     ctx.lineWidth = 1.5;
 
-    const drawHandle = (hx: number, hy: number) => {
+    const drawHandle = (hx, hy) => {
       ctx.beginPath();
       ctx.arc(hx, hy, 5, 0, Math.PI * 2);
       ctx.fill();
@@ -294,7 +265,7 @@ export default function InlineCropper({
 
   }, [isReady, image, renderSize, cropBox, flipH, flipV, showGrid, naturalSize]);
 
-  const getHitHandle = (clientX: number, clientY: number): string | null => {
+  const getHitHandle = (clientX, clientY) => {
     if (!canvasRef.current) return null;
     const rect = canvasRef.current.getBoundingClientRect();
     const x = clientX - rect.left;
@@ -357,7 +328,7 @@ export default function InlineCropper({
     return 'cursor-default';
   };
 
-  const startDrag = (clientX: number, clientY: number, hitX: number, hitY: number) => {
+  const startDrag = (clientX, clientY, hitX, hitY) => {
     const handle = getHitHandle(clientX, clientY);
 
     if (handle) {
@@ -383,7 +354,7 @@ export default function InlineCropper({
     }
   };
 
-  const moveDrag = (clientX: number, clientY: number) => {
+  const moveDrag = (clientX, clientY) => {
     if (!activeHandle || !dragStart || !canvasRef.current) return;
 
     const rect = canvasRef.current.getBoundingClientRect();
@@ -584,7 +555,7 @@ export default function InlineCropper({
     });
   };
 
-  const handleMouseDown = (e: React.MouseEvent) => {
+  const handleMouseDown = (e) => {
     if (!canvasRef.current) return;
     const rect = canvasRef.current.getBoundingClientRect();
     const scaleX = rect.width / canvasRef.current.width;
@@ -601,7 +572,7 @@ export default function InlineCropper({
     startDrag(e.clientX, e.clientY, x, y);
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
+  const handleMouseMove = (e) => {
     if (!canvasRef.current) return;
     
     if (!activeHandle) {
@@ -617,7 +588,7 @@ export default function InlineCropper({
     setDragStart(null);
   };
 
-  const handleTouchStart = (e: React.TouchEvent) => {
+  const handleTouchStart = (e) => {
     if (e.touches.length === 0 || !canvasRef.current) return;
     const touch = e.touches[0];
     const rect = canvasRef.current.getBoundingClientRect();
@@ -635,7 +606,7 @@ export default function InlineCropper({
     startDrag(touch.clientX, touch.clientY, x, y);
   };
 
-  const handleTouchMove = (e: React.TouchEvent) => {
+  const handleTouchMove = (e) => {
     if (e.touches.length === 0) return;
     if (activeHandle) {
       e.preventDefault();

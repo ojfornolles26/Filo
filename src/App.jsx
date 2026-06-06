@@ -7,14 +7,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { FileText, AlertCircle, FileCode, CheckCircle, Info, Upload, Image, ArrowLeft, RefreshCw, Layers, Sparkles, Shield, Settings, FilePlus, X, Sliders, Layout } from 'lucide-react';
 
-import {
-  FiloFile,
-  ConversionMode,
-  ImageToPdfOptions,
-  PdfToFormatOptions,
-  ConversionResult
-} from './types';
-
 import ThemeToggle from './components/ThemeToggle';
 import LeftToolsSidebar from './components/LeftToolsSidebar';
 import CoreWorkbench from './components/CoreWorkbench';
@@ -26,7 +18,7 @@ import LegalModal from './components/LegalModal';
 import { compileImagesToPdf } from './utils/converter';
 import { parsePdfClientSide, extractPdfPagesToImages, synthesizeTxtFile, synthesizeMarkdownFile } from './utils/pdfParser';
 
-const getMimeFromExtension = (filename: string): string => {
+const getMimeFromExtension = (filename) => {
   const ext = filename.split('.').pop()?.toLowerCase();
   if (ext === 'pdf') return 'application/pdf';
   if (ext === 'png') return 'image/png';
@@ -37,16 +29,16 @@ const getMimeFromExtension = (filename: string): string => {
 
 export default function App() {
   const [isDark, setIsDark] = useState(false);
-  const [activeLegalDoc, setActiveLegalDoc] = useState<'privacy' | 'terms' | null>(null);
-  const [mode, setMode] = useState<ConversionMode>('images-to-pdf');
-  const [files, setFiles] = useState<FiloFile[]>([]);
-  const [activeTab, setActiveTab] = useState<'canvas' | 'settings'>('canvas');
+  const [activeLegalDoc, setActiveLegalDoc] = useState(null);
+  const [mode, setMode] = useState('images-to-pdf');
+  const [files, setFiles] = useState([]);
+  const [activeTab, setActiveTab] = useState('canvas');
   
   // Landing Page Interactive Inputs & Drag Over States
-  const landingFileInputRef = useRef<HTMLInputElement>(null);
+  const landingFileInputRef = useRef(null);
   const [isLandingDragOver, setIsLandingDragOver] = useState(false);
 
-  const handleLandingDrag = (e: React.DragEvent) => {
+  const handleLandingDrag = (e) => {
     e.preventDefault();
     e.stopPropagation();
     if (e.type === 'dragenter' || e.type === 'dragover') {
@@ -56,7 +48,7 @@ export default function App() {
     }
   };
 
-  const handleLandingDrop = (e: React.DragEvent) => {
+  const handleLandingDrop = (e) => {
     e.preventDefault();
     e.stopPropagation();
     setIsLandingDragOver(false);
@@ -65,7 +57,7 @@ export default function App() {
     }
   };
 
-  const handleLandingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLandingChange = (e) => {
     if (e.target.files && e.target.files.length > 0) {
       handleFilesAdded(e.target.files);
     }
@@ -76,7 +68,7 @@ export default function App() {
   };
   
   // Compiler Options
-  const [pdfOptions, setPdfOptions] = useState<ImageToPdfOptions>({
+  const [pdfOptions, setPdfOptions] = useState({
     pageFormat: 'fit',
     orientation: 'auto',
     margin: 0,
@@ -84,7 +76,7 @@ export default function App() {
     pdfTitle: 'Filo_Document'
   });
 
-  const [formatOptions, setFormatOptions] = useState<PdfToFormatOptions>({
+  const [formatOptions, setFormatOptions] = useState({
     targetFormat: 'txt',
     pageRange: 'all',
     resolutionScale: 2
@@ -94,25 +86,25 @@ export default function App() {
   const [isConverting, setIsConverting] = useState(false);
   const [conversionProgress, setConversionProgress] = useState(0);
   const [conversionStep, setConversionStep] = useState('');
-  const [conversionError, setConversionError] = useState<string | null>(null);
+  const [conversionError, setConversionError] = useState(null);
 
   // Result States
-  const [result, setResult] = useState<ConversionResult | null>(null);
-  const [extractedText, setExtractedText] = useState<string | undefined>(undefined);
-  const [markdownText, setMarkdownText] = useState<string | undefined>(undefined);
+  const [result, setResult] = useState(null);
+  const [extractedText, setExtractedText] = useState(undefined);
+  const [markdownText, setMarkdownText] = useState(undefined);
 
   // Crop States
-  const [activeCropFile, setActiveCropFile] = useState<FiloFile | null>(null);
-  const [cropAspectRatio, setCropAspectRatio] = useState<'free' | 'original' | '1:1' | '4:3'>('free');
+  const [activeCropFile, setActiveCropFile] = useState(null);
+  const [cropAspectRatio, setCropAspectRatio] = useState('free');
   const [cropFlipH, setCropFlipH] = useState(false);
   const [cropFlipV, setCropFlipV] = useState(false);
   const [cropShowGrid, setCropShowGrid] = useState(true);
   const [isCropping, setIsCropping] = useState(false);
 
   // Active Cropper actions registration reference
-  const cropperActionsRef = useRef<{ reset: () => void; save: () => void } | null>(null);
+  const cropperActionsRef = useRef(null);
 
-  const registerCropperActions = (actions: { reset: () => void; save: () => void } | null) => {
+  const registerCropperActions = (actions) => {
     cropperActionsRef.current = actions;
   };
 
@@ -131,15 +123,15 @@ export default function App() {
     setIsCropping(false);
   }, [activeCropFile?.id]);
 
-  const handleSaveCrop = (croppedFile: File, previewUrl: string, size: number) => {
+  const handleSaveCrop = (croppedFile, previewUrl, size) => {
     if (!activeCropFile) return;
 
-    const updatedFile: FiloFile = {
+    const updatedFile = {
       ...activeCropFile,
       fileObject: croppedFile,
       previewUrl: previewUrl,
       size: size,
-      status: 'idle' as const
+      status: 'idle'
     };
 
     setFiles(prev => prev.map(f => f.id === activeCropFile.id ? updatedFile : f));
@@ -207,7 +199,7 @@ export default function App() {
   };
 
   // Change mode but preserve files loaded in the queue (no wipe out!)
-  const handleModeChange = (newMode: ConversionMode) => {
+  const handleModeChange = (newMode) => {
     setMode(newMode);
     setResult(null);
     setExtractedText(undefined);
@@ -216,7 +208,7 @@ export default function App() {
   };
 
   // Custom function to select queued file and dynamically swap configuration view
-  const handleSelectQueuedFile = (file: FiloFile | null) => {
+  const handleSelectQueuedFile = (file) => {
     setActiveCropFile(file);
     if (file) {
       if (file.type === 'application/pdf') {
@@ -228,10 +220,10 @@ export default function App() {
   };
 
   // Drag and drop handler
-  const handleFilesAdded = (fileList: FileList | File[]) => {
+  const handleFilesAdded = (fileList) => {
     if (fileList.length === 0) return;
 
-    let determinedMode: ConversionMode = mode;
+    let determinedMode = mode;
 
     // If starting a fresh session, auto-detect the default mode from first file
     if (files.length === 0) {
@@ -261,7 +253,7 @@ export default function App() {
       setMode(determinedMode);
     }
 
-    const newFiloFiles: FiloFile[] = [];
+    const newFiloFiles = [];
     
     for (let i = 0; i < fileList.length; i++) {
       const file = fileList[i];
@@ -307,7 +299,7 @@ export default function App() {
   };
 
   // Deletion mechanics
-  const handleRemoveFile = (id: string) => {
+  const handleRemoveFile = (id) => {
     setFiles(prev => {
       const target = prev.find(f => f.id === id);
       if (target?.previewUrl) {
@@ -319,7 +311,7 @@ export default function App() {
   };
 
   // Rearranging items up
-  const handleMoveUp = (idx: number) => {
+  const handleMoveUp = (idx) => {
     if (idx === 0) return;
     setFiles(prev => {
       const copy = [...prev];
@@ -332,7 +324,7 @@ export default function App() {
   };
 
   // Rearranging items down
-  const handleMoveDown = (idx: number) => {
+  const handleMoveDown = (idx) => {
     if (idx === files.length - 1) return;
     setFiles(prev => {
       const copy = [...prev];
@@ -361,10 +353,10 @@ export default function App() {
     setMarkdownText(undefined);
   };
 
-  const readFileAsArrayBuffer = (file: File): Promise<ArrayBuffer> => {
+  const readFileAsArrayBuffer = (file) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as ArrayBuffer);
+      reader.onload = () => resolve(reader.result);
       reader.onerror = () => reject(new Error('Failed to read PDF file binary contents.'));
       reader.readAsArrayBuffer(file);
     });
@@ -463,9 +455,9 @@ export default function App() {
           });
         }
 
-        setFiles(prev => prev.map(f => f.id === targetPdf.id ? { ...f, status: 'completed' as const } : f));
+        setFiles(prev => prev.map(f => f.id === targetPdf.id ? { ...f, status: 'completed' } : f));
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
       setConversionError(err.message || 'Unable to read the PDF file. It may be corrupted or password-protected.');
       setFiles(prev => prev.map(f => f.status === 'converting' ? { ...f, status: 'failed' } : f));
@@ -618,7 +610,7 @@ export default function App() {
 
               {/* Quick Feature Guides */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto pt-4 relative z-10">
-                <div className="p-5 bg-white/70 dark:bg-stone-900/60 backdrop-blur-md border border-stone-200 dark:border-stone-800/85 rounded-2xl space-y-2.5 transition-all duration-300 hover:bg-white/80 dark:hover:bg-stone-900/85 shadow-2xs">
+                <div className="p-5 bg-white/70 dark:bg-stone-900/60 backdrop-blur-md border border-stone-200 dark:border-stone-800/85 rounded-2xl space-y-2.5 transition-all duration-350 hover:bg-white/80 dark:hover:bg-stone-900/85 shadow-2xs">
                   <div className="flex items-center space-x-2.5">
                     <div className="p-2 rounded-lg bg-blue-600/10 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400 flex items-center justify-center">
                       <Image className="h-4 w-4" />
@@ -632,7 +624,7 @@ export default function App() {
                   </p>
                 </div>
 
-                <div className="p-5 bg-white/70 dark:bg-stone-900/60 backdrop-blur-md border border-stone-200 dark:border-stone-800/85 rounded-2xl space-y-2.5 transition-all duration-300 hover:bg-white/80 dark:hover:bg-stone-900/85 shadow-2xs">
+                <div className="p-5 bg-white/70 dark:bg-stone-900/60 backdrop-blur-md border border-stone-200 dark:border-stone-800/85 rounded-2xl space-y-2.5 transition-all duration-350 hover:bg-white/80 dark:hover:bg-stone-900/85 shadow-2xs">
                   <div className="flex items-center space-x-2.5">
                     <div className="p-2 rounded-lg bg-emerald-600/10 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 flex items-center justify-center">
                       <FileText className="h-4 w-4" />

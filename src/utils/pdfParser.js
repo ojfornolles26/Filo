@@ -7,31 +7,19 @@ import * as pdfjsLib from 'pdfjs-dist';
 import JSZip from 'jszip';
 
 // Vite-specific worker loading using asset url import
-// @ts-ignore
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
 // Set worker path
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
-export interface ParsedPdfResult {
-  pageCount: number;
-  title: string | null;
-  author: string | null;
-  creator: string | null;
-  textByPage: string[];
-  allText: string;
-  isScannedOrGraphicsOnly: boolean;
-  fileSize: number;
-}
-
 /**
  * Standard PDF text and metadata extractor
  */
 export const parsePdfClientSide = async (
-  fileData: ArrayBuffer,
-  fileName: string,
-  onProgress: (percent: number, stepLabel: string) => void
-): Promise<ParsedPdfResult> => {
+  fileData,
+  fileName,
+  onProgress
+) => {
   onProgress(10, 'Opening PDF document...');
   
   try {
@@ -52,12 +40,12 @@ export const parsePdfClientSide = async (
 
     onProgress(35, 'Extracting metadata details...');
     const metadata = await pdfDoc.getMetadata();
-    const info = metadata?.info as any;
+    const info = metadata?.info;
     const title = info?.Title || null;
     const author = info?.Author || null;
     const creator = info?.Creator || null;
 
-    const textByPage: string[] = [];
+    const textByPage = [];
     
     for (let i = 1; i <= pageCount; i++) {
       const percent = Math.floor(40 + (i / pageCount) * 55);
@@ -68,7 +56,7 @@ export const parsePdfClientSide = async (
       
       // Map text items to string segments
       const pageText = textContent.items
-        .map((item: any) => item.str)
+        .map((item) => item.str)
         .join(' ');
       
       textByPage.push(pageText);
@@ -89,7 +77,7 @@ export const parsePdfClientSide = async (
       isScannedOrGraphicsOnly,
       fileSize: fileData.byteLength
     };
-  } catch (err: any) {
+  } catch (err) {
     console.error('PDF.js client extraction failed:', err);
     throw new Error(err.message || 'Standard parser failed to read PDF contents. The file may be password-protected or corrupted.');
   }
@@ -99,11 +87,11 @@ export const parsePdfClientSide = async (
  * Render PDF pages onto canvas and bundle them into a ZIP archive
  */
 export const extractPdfPagesToImages = async (
-  fileData: ArrayBuffer,
-  targetFormat: 'png' | 'jpeg',
-  resolutionScale: number,
-  onProgress: (percent: number, stepLabel: string) => void
-): Promise<{ blob: Blob; fileName: string }> => {
+  fileData,
+  targetFormat,
+  resolutionScale,
+  onProgress
+) => {
   onProgress(10, 'Initializing page drawing engine...');
   
   try {
@@ -140,8 +128,7 @@ export const extractPdfPagesToImages = async (
       };
       
       // Render layout to canvas context
-      // @ts-ignore
-      await page.render(renderContext as any).promise;
+      await page.render(renderContext).promise;
       
       const mimeType = targetFormat === 'png' ? 'image/png' : 'image/jpeg';
       const dataUrl = canvas.toDataURL(mimeType, targetFormat === 'jpeg' ? 0.92 : undefined);
@@ -160,7 +147,7 @@ export const extractPdfPagesToImages = async (
       blob,
       fileName: `pages_${targetFormat}_bundle.zip`
     };
-  } catch (err: any) {
+  } catch (err) {
     console.error('Canvas page extraction failed:', err);
     throw new Error(err.message || 'Image rendering engine failed to compile PDF pages.');
   }
@@ -169,7 +156,7 @@ export const extractPdfPagesToImages = async (
 /**
  * Generate structural plain text from parsed results
  */
-export const synthesizeTxtFile = (parsed: ParsedPdfResult): { text: string; blobUrl: string } => {
+export const synthesizeTxtFile = (parsed) => {
   let output = '';
   output += `==================================================\n`;
   output += `CONVERTED TEXT FROM PDF\n`;
@@ -198,7 +185,7 @@ export const synthesizeTxtFile = (parsed: ParsedPdfResult): { text: string; blob
 /**
  * Generate structural markdown from parsed results
  */
-export const synthesizeMarkdownFile = (parsed: ParsedPdfResult): { markdown: string; blobUrl: string } => {
+export const synthesizeMarkdownFile = (parsed) => {
   let md = '';
   md += `# ${parsed.title || 'Untitled Document'}\n\n`;
   md += `> **Document Information**\n`;

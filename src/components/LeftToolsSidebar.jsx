@@ -5,25 +5,6 @@
 
 import { Crop, FlipHorizontal, FlipVertical, Grid, RefreshCw, Check, FileText, Sliders } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { FiloFile, ConversionMode } from '../types';
-
-interface LeftToolsSidebarProps {
-  mode: ConversionMode;
-  activeCropFile: FiloFile | null;
-  cropAspectRatio: 'free' | 'original' | '1:1' | '4:3';
-  setCropAspectRatio: (type: 'free' | 'original' | '1:1' | '4:3') => void;
-  cropFlipH: boolean;
-  setCropFlipH: (val: boolean) => void;
-  cropFlipV: boolean;
-  setCropFlipV: (val: boolean) => void;
-  cropShowGrid: boolean;
-  setCropShowGrid: (val: boolean) => void;
-  onCropReset: () => void;
-  onCropSave: () => void;
-  files: FiloFile[];
-  isCropping: boolean;
-  setIsCropping: (val: boolean) => void;
-}
 
 export default function LeftToolsSidebar({
   mode,
@@ -41,9 +22,9 @@ export default function LeftToolsSidebar({
   files,
   isCropping,
   setIsCropping
-}: LeftToolsSidebarProps) {
+}) {
   
-  const formatSize = (bytes: number): string => {
+  const formatSize = (bytes) => {
     if (bytes === 0) return '0 B';
     const k = 1024;
     const sizes = ['B', 'KB', 'MB'];
@@ -129,7 +110,7 @@ export default function LeftToolsSidebar({
                               <button
                                 key={preset.id}
                                 type="button"
-                                onClick={() => setCropAspectRatio(preset.id as any)}
+                                onClick={() => setCropAspectRatio(preset.id)}
                                 className={`px-2 py-1.5 text-[10.5px] rounded border cursor-pointer font-medium transition-colors focus:outline-none ${
                                   cropAspectRatio === preset.id
                                     ? 'bg-blue-600/10 border-blue-500 text-blue-600 dark:bg-blue-500/10 dark:border-blue-400 dark:text-blue-400 font-semibold shadow-xs'

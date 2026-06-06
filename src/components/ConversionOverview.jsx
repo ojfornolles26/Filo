@@ -6,15 +6,6 @@
 import { useState } from 'react';
 import { Download, CheckCircle, Copy, Check, RefreshCw, Eye, EyeOff, FileText, Code, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ConversionResult } from '../types';
-
-interface ConversionOverviewProps {
-  result: ConversionResult | null;
-  extractedText?: string;
-  markdownText?: string;
-  onReset: () => void;
-  onClose?: () => void;
-}
 
 export default function ConversionOverview({
   result,
@@ -22,14 +13,14 @@ export default function ConversionOverview({
   markdownText,
   onReset,
   onClose
-}: ConversionOverviewProps) {
+}) {
   const [copied, setCopied] = useState(false);
-  const [activeTab, setActiveTab] = useState<'txt' | 'md'>(extractedText ? 'txt' : 'md');
+  const [activeTab, setActiveTab] = useState(extractedText ? 'txt' : 'md');
   const [isOpenPreview, setIsOpenPreview] = useState(false);
 
   if (!result) return null;
 
-  const formatSize = (bytes: number): string => {
+  const formatSize = (bytes) => {
     if (bytes === 0) return '0 B';
     const k = 1024;
     const sizes = ['B', 'KB', 'MB'];

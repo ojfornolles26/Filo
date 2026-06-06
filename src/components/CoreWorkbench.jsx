@@ -6,32 +6,7 @@
 import React, { useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { FileUp, FileText, ArrowLeft, Layout, CheckCircle2, Crop, FlipHorizontal, FlipVertical, Grid, RefreshCw, Check } from 'lucide-react';
-import { FiloFile, ConversionMode } from '../types';
 import InlineCropper from './InlineCropper';
-
-
-interface CoreWorkbenchProps {
-  files: FiloFile[];
-  mode: ConversionMode;
-  onFilesAdded: (fileList: FileList | File[]) => void;
-  activeCropFile: FiloFile | null;
-  onSaveCrop: (croppedFile: File, previewUrl: string, size: number) => void;
-  triggerConversion: () => void;
-  isConverting: boolean;
-  aspectRatioType: 'free' | 'original' | '1:1' | '4:3';
-  setAspectRatioType: (type: 'free' | 'original' | '1:1' | '4:3') => void;
-  flipH: boolean;
-  setFlipH: (val: boolean) => void;
-  flipV: boolean;
-  setFlipV: (val: boolean) => void;
-  showGrid: boolean;
-  setShowGrid: (val: boolean) => void;
-  onRegisterActions: (actions: { reset: () => void; save: () => void } | null) => void;
-  onExitWorkspace: () => void; // New prop for integrated navigation
-  isCropping: boolean;
-  setIsCropping?: (val: boolean) => void;
-  onCropSaveGlobal?: () => void;
-}
 
 export default function CoreWorkbench({
   files,
@@ -54,11 +29,11 @@ export default function CoreWorkbench({
   isCropping,
   setIsCropping,
   onCropSaveGlobal
-}: CoreWorkbenchProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
+}) {
+  const fileInputRef = useRef(null);
   const [isDragOver, setIsDragOver] = useState(false);
 
-  const handleDrag = (e: React.DragEvent) => {
+  const handleDrag = (e) => {
     e.preventDefault();
     e.stopPropagation();
     if (e.type === 'dragenter' || e.type === 'dragover') {
@@ -68,7 +43,7 @@ export default function CoreWorkbench({
     }
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = (e) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragOver(false);
@@ -77,13 +52,13 @@ export default function CoreWorkbench({
     }
   };
 
-  const handleFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFilesChange = (e) => {
     if (e.target.files && e.target.files.length > 0) {
       onFilesAdded(e.target.files);
     }
   };
 
-  const formatSize = (bytes: number): string => {
+  const formatSize = (bytes) => {
     if (bytes === 0) return '0 B';
     const k = 1024;
     const sizes = ['B', 'KB', 'MB'];
@@ -173,7 +148,7 @@ export default function CoreWorkbench({
                 <button
                   type="button"
                   onClick={onExitWorkspace}
-                  className="px-3 py-1.5 bg-stone-50 hover:bg-stone-100 active:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-800 dark:active:bg-stone-800 border border-stone-200 dark:border-stone-800 rounded-lg font-sans text-xs font-semibold text-stone-700 dark:text-stone-300 hover:text-stone-950 dark:hover:text-stone-100 flex items-center space-x-1.5 cursor-pointer focus:outline-none transition-all shadow-xs"
+                  className="px-3 py-1.5 bg-stone-50 hover:bg-stone-100 active:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-800 dark:active:bg-stone-850 border border-stone-200 dark:border-stone-800 rounded-lg font-sans text-xs font-semibold text-stone-700 dark:text-stone-300 hover:text-stone-950 dark:hover:text-stone-100 flex items-center space-x-1.5 cursor-pointer focus:outline-none transition-all shadow-xs"
                 >
                   <ArrowLeft className="h-3.5 w-3.5 stroke-[2.5]" />
                   <span>Exit Workspace</span>
@@ -244,7 +219,7 @@ export default function CoreWorkbench({
                                     <button
                                       key={preset.id}
                                       type="button"
-                                      onClick={() => setAspectRatioType(preset.id as any)}
+                                      onClick={() => setAspectRatioType(preset.id)}
                                       className={`py-1 text-[10px] rounded border cursor-pointer font-bold transition-colors focus:outline-none text-center ${
                                         aspectRatioType === preset.id
                                           ? 'bg-blue-600/10 border-blue-500 text-blue-600 dark:bg-blue-500/10 dark:border-blue-400 dark:text-blue-400 shadow-xs'
