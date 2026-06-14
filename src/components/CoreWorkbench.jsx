@@ -357,7 +357,7 @@ export default function CoreWorkbench({
                       <div className="h-72 border border-stone-200/50 dark:border-stone-800/40 bg-stone-50/20 rounded-xl flex items-center justify-center p-4">
                         <div className="flex flex-col items-center space-y-2">
                           <div className="w-5 h-5 border-2 border-stone-500 border-t-transparent rounded-full animate-spin" />
-                          <span className="font-sans text-xs text-stone-500">Retrieving active canvas...</span>
+                          <span className="font-sans text-xs text-stone-500">Loading image preview...</span>
                         </div>
                       </div>
                     )}

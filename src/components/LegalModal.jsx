@@ -5,7 +5,7 @@
 
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Shield, FileText, CheckCircle } from 'lucide-react';
+import { X, CheckCircle } from 'lucide-react';
 
 export default function LegalModal({ type, onClose }) {
   // Prevent body scroll when modal is open
@@ -56,10 +56,7 @@ export default function LegalModal({ type, onClose }) {
           >
           {/* Header */}
           <div className="px-6 py-4 border-b border-stone-200/50 dark:border-stone-800/40 flex items-center justify-between shrink-0 bg-white/40 dark:bg-stone-950/20 backdrop-blur-md">
-            <div className="flex items-center space-x-2.5">
-              <div className="p-2 rounded-lg bg-blue-600/10 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400 flex items-center justify-center">
-                {isPrivacy ? <Shield className="h-4 w-4" /> : <FileText className="h-4 w-4" />}
-              </div>
+            <div className="flex items-center">
               <h2 className="font-sans text-sm md:text-base font-bold text-stone-900 dark:text-stone-100">
                 {isPrivacy ? 'Privacy Policy & Guarantees' : 'Terms of Service'}
               </h2>

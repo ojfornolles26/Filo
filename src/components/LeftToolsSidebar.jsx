@@ -5,6 +5,7 @@
 
 import { Crop, FlipHorizontal, FlipVertical, Grid, RefreshCw, Check, FileText, Sliders } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import ThemeToggle from './ThemeToggle';
 
 export default function LeftToolsSidebar({
   mode,
@@ -21,7 +22,9 @@ export default function LeftToolsSidebar({
   onCropSave,
   files,
   isCropping,
-  setIsCropping
+  setIsCropping,
+  isDark,
+  toggleTheme
 }) {
   
   const formatSize = (bytes) => {
@@ -39,13 +42,16 @@ export default function LeftToolsSidebar({
   return (
     <div className="flex flex-col h-full bg-white/70 dark:bg-stone-950/60 backdrop-blur-md p-6 border border-stone-200/50 dark:border-stone-800/40 rounded-xl justify-between custom-scrollbar shadow-xs transition-all duration-300 hover:shadow-sm">
       
-      <div className="flex items-center space-x-2 pb-4 mb-2 border-b border-stone-200/40 dark:border-stone-800/30 shrink-0">
-        <div className="h-6 w-6 rounded bg-blue-600 dark:bg-blue-500 flex items-center justify-center shadow-xs select-none">
-          <FileText className="h-3.5 w-3.5 text-white" strokeWidth={2.5} />
+      <div className="flex items-center justify-between pb-4 mb-2 border-b border-stone-200/40 dark:border-stone-800/30 shrink-0">
+        <div className="flex items-center space-x-2">
+          <div className="h-6 w-6 rounded bg-blue-600 dark:bg-blue-500 flex items-center justify-center shadow-xs select-none">
+            <FileText className="h-3.5 w-3.5 text-white" strokeWidth={2.5} />
+          </div>
+          <div className="font-brand italic text-xl font-bold tracking-tight text-stone-900 dark:text-stone-100 leading-none">
+            Filo
+          </div>
         </div>
-        <div className="font-brand italic text-xl font-bold tracking-tight text-stone-900 dark:text-stone-100 leading-none">
-          Filo
-        </div>
+        <ThemeToggle isDark={isDark} toggleTheme={toggleTheme} />
       </div>
 
       <AnimatePresence mode="wait" initial={false}>

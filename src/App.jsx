@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { FileText, AlertCircle, FileCode, CheckCircle, Info, Upload, Image, ArrowLeft, RefreshCw, Layers, Sparkles, Shield, Settings, FilePlus, X, Sliders, Layout } from 'lucide-react';
+import { FileText, AlertCircle, FileCode, CheckCircle, Info, Upload, Image, ArrowLeft, RefreshCw, FileStack, Sparkles, Shield, Settings, FilePlus, X, Sliders, Layout } from 'lucide-react';
 
 import ThemeToggle from './components/ThemeToggle';
 import LeftToolsSidebar from './components/LeftToolsSidebar';
@@ -205,6 +205,10 @@ export default function App() {
     setExtractedText(undefined);
     setMarkdownText(undefined);
     setConversionError(null);
+    // Delay switching tabs slightly so the workspace exit transition completes out of view
+    setTimeout(() => {
+      setActiveTab('canvas');
+    }, 200);
   };
 
   // Custom function to select queued file and dynamically swap configuration view
@@ -216,6 +220,10 @@ export default function App() {
       } else if (file.type.startsWith('image/')) {
         setMode('images-to-pdf');
       }
+      // Delay switching tabs slightly so the workspace exit transition completes out of view
+      setTimeout(() => {
+        setActiveTab('canvas');
+      }, 200);
     }
   };
 
@@ -489,20 +497,24 @@ export default function App() {
       <header className={`border-b border-stone-200 dark:border-stone-800 bg-[#f7f5f0]/80 dark:bg-[#0c0a09]/80 backdrop-blur-md sticky top-0 z-30 w-full shrink-0 ${
         isWorkspaceActive ? 'lg:hidden' : ''
       }`}>
-        <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+        <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-3">
           {isWorkspaceActive ? (
-            <div className="flex items-center space-x-3">
-              <button
-                type="button"
-                onClick={handleReset}
-                className="px-2.5 py-1.5 bg-stone-100 hover:bg-stone-200/80 active:bg-stone-300 dark:bg-stone-900 dark:hover:bg-stone-800 dark:active:bg-stone-700/60 border border-stone-200/60 dark:border-stone-800/80 rounded-lg font-sans text-xs font-semibold text-stone-700 dark:text-stone-300 hover:text-stone-950 dark:hover:text-stone-100 flex items-center space-x-1.5 cursor-pointer focus:outline-none transition-all shadow-xs"
-              >
-                <ArrowLeft className="h-3.5 w-3.5 stroke-[2.5]" />
-                <span className="hidden sm:inline">Exit Workspace</span>
-                <span className="sm:hidden">Exit</span>
-              </button>
-              <span className="text-stone-300 dark:text-stone-800">|</span>
-              <div className="flex items-center space-x-1.5 select-none">
+            <div className="grid grid-cols-3 items-center w-full">
+              {/* Left: Exit button */}
+              <div className="flex justify-start">
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  className="px-2.5 py-1.5 bg-stone-100 hover:bg-stone-200/80 active:bg-stone-300 dark:bg-stone-900 dark:hover:bg-stone-800 dark:active:bg-stone-700/60 border border-stone-200/60 dark:border-stone-800/80 rounded-lg font-sans text-xs font-semibold text-stone-700 dark:text-stone-300 hover:text-stone-950 dark:hover:text-stone-100 flex items-center space-x-1.5 cursor-pointer focus:outline-none transition-all shadow-xs"
+                >
+                  <ArrowLeft className="h-3.5 w-3.5 stroke-[2.5]" />
+                  <span className="hidden sm:inline">Exit Workspace</span>
+                  <span className="sm:hidden">Exit</span>
+                </button>
+              </div>
+
+              {/* Center: Logo */}
+              <div className="flex justify-center items-center space-x-1.5 select-none">
                 <div className="h-6 w-6 rounded bg-blue-600 dark:bg-blue-500 flex items-center justify-center shadow-xs">
                   <FileText className="h-3 w-3 text-white" strokeWidth={2} />
                 </div>
@@ -510,27 +522,28 @@ export default function App() {
                   Filo
                 </div>
               </div>
+
+              {/* Right: Theme Toggle */}
+              <div className="flex justify-end items-center">
+                <ThemeToggle isDark={isDark} toggleTheme={toggleTheme} />
+              </div>
             </div>
           ) : (
-            <div className="flex items-center space-x-2">
-              <div className="h-7 w-7 rounded-lg bg-blue-600 dark:bg-blue-500 flex items-center justify-center shadow-xs select-none">
-                <FileText className="h-4 w-4 text-white" strokeWidth={2} />
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center space-x-2">
+                <div className="h-7 w-7 rounded-lg bg-blue-600 dark:bg-blue-500 flex items-center justify-center shadow-xs select-none">
+                  <FileText className="h-4 w-4 text-white" strokeWidth={2} />
+                </div>
+                <div className="font-brand italic text-2xl font-bold tracking-tight text-stone-900 dark:text-stone-100 select-none">
+                  Filo
+                </div>
               </div>
-              <div className="font-brand italic text-2xl font-bold tracking-tight text-stone-900 dark:text-stone-100 select-none">
-                Filo
+
+              <div className="flex items-center space-x-3">
+                <ThemeToggle isDark={isDark} toggleTheme={toggleTheme} />
               </div>
             </div>
           )}
-
-          {isWorkspaceActive && (
-            <div className="hidden md:block font-sans text-[11px] font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wider truncate max-w-[400px]">
-              {mode === 'images-to-pdf' ? 'Create PDF Workspace' : 'Extract PDF Workspace'}
-            </div>
-          )}
-
-          <div className="flex items-center space-x-3">
-            <ThemeToggle isDark={isDark} toggleTheme={toggleTheme} />
-          </div>
         </div>
       </header>
 
@@ -792,6 +805,8 @@ export default function App() {
                       files={files}
                       isCropping={isCropping}
                       setIsCropping={setIsCropping}
+                      isDark={isDark}
+                      toggleTheme={toggleTheme}
                     />
                   </div>
 
@@ -868,8 +883,8 @@ export default function App() {
                         : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'
                     }`}
                   >
-                    <Sliders className="h-5 w-5" strokeWidth={activeTab === 'settings' ? 2.2 : 1.6} />
-                    <span className="font-sans text-[10px] font-bold tracking-wide uppercase">Settings</span>
+                    <FileStack className="h-5 w-5" strokeWidth={activeTab === 'settings' ? 2.2 : 1.6} />
+                    <span className="font-sans text-[10px] font-bold tracking-wide uppercase">Queue</span>
                     {files.length > 0 && (
                       <span className="absolute -top-1 right-2 min-w-4 h-4 px-1 rounded-full bg-blue-600 dark:bg-blue-500 text-white font-mono text-[9px] font-bold flex items-center justify-center shadow-xs border border-white dark:border-stone-900">
                         {files.length}
@@ -898,7 +913,7 @@ export default function App() {
           >
             <div className="w-full max-w-[1440px] mx-auto px-6 lg:px-8 text-center font-sans text-xs uppercase tracking-widest text-stone-500 dark:text-stone-400 font-medium space-y-2">
               <div>
-                &copy; {new Date().getFullYear()} Filo &bull; 100% Private &bull; Processed Locally (Files Never Leave Your Device)
+                &copy; {new Date().getFullYear()} Filo &bull; Processed locally for absolute privacy
               </div>
               <div className="flex items-center justify-center space-x-4 font-bold">
                 <button
